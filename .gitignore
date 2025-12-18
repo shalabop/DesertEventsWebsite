@@ -1,0 +1,15 @@
+﻿# dependencies
+node_modules/
+.ignored_node_modules/
+.pnpm-store/
+
+# next
+.next/
+out/
+
+# env
+.env
+.env.local
+
+# misc
+.DS_Store
