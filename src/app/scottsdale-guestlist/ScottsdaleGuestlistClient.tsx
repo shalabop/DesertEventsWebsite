@@ -7,13 +7,14 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { submitLead } from "@/app/actions/submitLead"
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion"
 
-// FIX: Simplified z.number() to avoid strict type errors during build
+// FIX: Strictly typed schema for Vercel build
 const schema = z.object({
   name: z.string().min(2, "Name is required"),
   phone: z.string().min(7, "Phone is required"),
   email: z.string().email("Invalid email"),
   venue: z.string().min(1, "Pick a venue"),
   date: z.string().min(1, "Pick a date"),
+  // CHANGED: Removed { invalid_type_error } to prevent build error
   party_size: z.number().int().positive("Party size must be > 0"),
   intent: z.enum(["guestlist","table"]),
   budget_range: z.string().default(""),
