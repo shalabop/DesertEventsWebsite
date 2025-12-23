@@ -4,121 +4,101 @@ import Image from "next/image"
 import Link from "next/link"
 import { motion } from "framer-motion"
 
+// Strictly the 4 main brands
 const brands = [
   { title: "Scottsdale GuestList", href: "/scottsdale-guestlist", img: "/gallery/1.jpg", blurb: "Priority entry & VIP tables" },
   { title: "Le Tour De Crawl", href: "/le-tour-de-crawl", img: "/gallery/2.jpg", blurb: "National bar crawls" },
   { title: "Society Sessions", href: "/society-sessions", img: "/gallery/3.jpg", blurb: "House-music community" },
   { title: "Tableworthy", href: "/tableworthy", img: "/gallery/4.jpg", blurb: "Influencer hospitality" },
-  { title: "Featured Event", href: "/scottsdale-guestlist", img: "/gallery/5.jpg", blurb: "Next drop — don’t miss" },
-  { title: "Aftermovie", href: "/scottsdale-guestlist", img: "/gallery/6.jpg", blurb: "Last night highlights" },
 ]
 
 export default function HomePage() {
   return (
-    <div className="space-y-20 md:space-y-28">
-      {/* HERO — full-bleed media + big editorial headline */}
-      <section className="relative rounded-2xl overflow-hidden">
+    <div className="space-y-24 md:space-y-32">
+      {/* HERO */}
+      <section className="relative rounded-2xl overflow-hidden min-h-[85vh] flex items-center">
         <video className="absolute inset-0 w-full h-full object-cover" autoPlay muted loop playsInline poster="/hero.jpg">
           <source src="/hero.mp4" type="video/mp4" />
         </video>
-        <div className="ff-vignette" />
-        <div className="relative z-10 px-5 md:px-8 pt-16 pb-20 md:pt-24 md:pb-28 max-w-screen-xl mx-auto">
-          <p className="ff-eyebrow">Desert Events Arizona</p>
-          <motion.h1
-            initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{duration:.5}}
-            className="font-display text-4xl md:text-6xl leading-[1.05] max-w-4xl"
-          >
-            Arizona’s Leading Nightlife & Event Collective
-          </motion.h1>
-          <motion.p
-            initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{duration:.55, delay:.05}}
-            className="text-[#C4C4C4] max-w-2xl mt-4"
-          >
-            Old Town’s top venues, curated crawls, and culture-first sessions. Built for speed, clarity, and strong conversions.
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0B0B0B] via-[#0B0B0B]/40 to-transparent" />
+        
+        <div className="relative z-10 px-6 max-w-screen-xl mx-auto w-full pt-20">
+          <motion.p initial={{opacity:0, y:10}} animate={{opacity:1, y:0}} transition={{delay:0.2}} 
+            className="text-[#32F36A] font-medium tracking-wider mb-4 uppercase text-sm">
+            Desert Events Arizona
           </motion.p>
-          <motion.div initial={{opacity:0}} animate={{opacity:1}} transition={{delay:.12}} className="mt-8 flex flex-wrap gap-3">
-            <Link href="/scottsdale-guestlist" className="ff-cta">Explore Scottsdale GuestList</Link>
-            <a href="#brands" className="ff-link">Discover Our Brands →</a>
+          <motion.h1 initial={{opacity:0, y:10}} animate={{opacity:1, y:0}} transition={{delay:0.3}}
+            className="font-display text-5xl md:text-7xl lg:text-8xl leading-[1] max-w-4xl text-white mb-6">
+            Arizona’s Leading <br/> Nightlife & Event <br/> Collective
+          </motion.h1>
+          <motion.div initial={{opacity:0}} animate={{opacity:1}} transition={{delay:0.5}} className="flex flex-wrap gap-4 mt-8">
+            <Link href="/scottsdale-guestlist" className="bg-[#32F36A] text-black px-8 py-4 rounded-full font-bold hover:bg-white transition-colors">
+              Explore Scottsdale GuestList
+            </Link>
+            <Link href="#brands" className="px-8 py-4 rounded-full border border-white/20 hover:bg-white/10 transition-colors">
+              Discover Our Brands
+            </Link>
           </motion.div>
         </div>
       </section>
 
-      {/* ORIGIN STORY — split editorial block */}
-      <section className="max-w-screen-xl mx-auto px-5 md:px-8">
-        <div className="ff-grid items-start">
-          <div className="col-span-12 md:col-span-5">
-            <p className="ff-eyebrow">Origin Story</p>
-            <h2 className="font-display text-2xl md:text-4xl leading-tight mt-2">
-              We didn’t just want to throw parties — we wanted to build a culture.
-            </h2>
-          </div>
-          <div className="col-span-12 md:col-span-7 text-[#C4C4C4] mt-6 md:mt-0 md:pl-8">
-            <p>
-              What started as a campus movement became Arizona’s most recognized nightlife ecosystem.
-              From VIP tables to national crawls, our mission is simple: memorable nights that run smoothly.
-            </p>
-            <p className="mt-4">
-              Founders: GL, JD, JL, JM. Based in Scottsdale. Focused on craft, community, and seamless logistics.
-            </p>
-          </div>
+      {/* ORIGIN STORY (Parallax style) */}
+      <section className="max-w-screen-xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
+        <div>
+           <p className="text-[#C4C4C4] text-lg leading-relaxed">
+             "We didn’t just want to throw parties — we wanted to build a culture."
+           </p>
+           <p className="mt-4 text-white font-display text-2xl">
+             Founders: GL, JD, JL, JM
+           </p>
+        </div>
+        <div className="text-[#666] text-sm md:text-base leading-relaxed">
+          What started as a campus movement became Arizona’s most recognized nightlife ecosystem. 
+          From VIP tables to national crawls, our mission is simple: memorable nights that run smoothly.
         </div>
       </section>
 
-      {/* MOSAIC — asymmetric, magazine-y grid */}
-      <section id="brands" className="max-w-screen-xl mx-auto px-5 md:px-8">
-        <div className="ff-grid">
-          {brands.map((b, i) => (
-            <article
-              key={b.title}
-              className={[
-                "col-span-12 sm:col-span-6 lg:col-span-4",
-                i % 5 === 0 ? "lg:col-span-8" : "",  // make some tiles wider for asymmetry
-              ].join(" ")}
-            >
-              <Link href={b.href} className="block group">
-                <div className="relative h-[260px] md:h-[360px] overflow-hidden rounded-2xl">
-                  <Image src={b.img} alt={b.title} fill className="ff-img group-hover:scale-[1.02]" />
+      {/* BRANDS GRID */}
+      <section id="brands" className="max-w-screen-xl mx-auto px-6">
+        <h2 className="font-display text-3xl md:text-4xl mb-10">Our Brands</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {brands.map((b) => (
+            <Link key={b.title} href={b.href} className="group relative block overflow-hidden rounded-3xl">
+              <div className="relative h-[400px]">
+                <Image src={b.img} alt={b.title} fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors" />
+                <div className="absolute bottom-0 left-0 p-8">
+                  <h3 className="font-display text-3xl text-white mb-1">{b.title}</h3>
+                  <p className="text-[#C4C4C4]">{b.blurb}</p>
                 </div>
-                <div className="mt-3 flex items-baseline justify-between">
-                  <h3 className="font-display text-xl md:text-2xl">{b.title}</h3>
-                  <span className="text-xs text-[#C4C4C4]">View</span>
+                <div className="absolute top-8 right-8 bg-white/10 backdrop-blur px-4 py-2 rounded-full text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
+                  Explore
                 </div>
-                <p className="text-sm text-[#C4C4C4] mt-1">{b.blurb}</p>
-              </Link>
-            </article>
+              </div>
+            </Link>
           ))}
         </div>
       </section>
 
-      {/* MARQUEE — social proof / taglines */}
-      <section className="py-8 border-y border-white/10">
-        <div className="ff-marquee">
-          <div className="ff-marquee-track">
-            {Array.from({length:12}).map((_,i) => (
-              <span key={i} className="text-[#C4C4C4]">Arizona • Old Town • VIP Tables • Bar Crawls • House Music • Culture •</span>
+      {/* FEATURED EVENTS */}
+      <section className="max-w-screen-xl mx-auto px-6 pb-20">
+         <div className="flex justify-between items-end mb-10">
+            <h2 className="font-display text-3xl md:text-4xl">Featured Events</h2>
+            <Link href="/scottsdale-guestlist" className="text-[#32F36A] hover:text-white transition-colors">View All →</Link>
+         </div>
+         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[1,2,3].map(i => (
+              <div key={i} className="bg-[#111] border border-white/5 rounded-2xl p-4 hover:border-[#32F36A]/50 transition-colors cursor-pointer">
+                <div className="h-48 bg-[#1a1a1a] rounded-xl mb-4 relative overflow-hidden">
+                   {/* Placeholder for event image */}
+                   <Image src={`/gallery/${i+2}.jpg`} alt="" fill className="object-cover opacity-60" />
+                </div>
+                <div className="text-[#32F36A] text-xs font-mono mb-2">NOV {10 + i} • 9:00 PM</div>
+                <h3 className="text-xl font-display mb-1">Desert Nights Vol. {i}</h3>
+                <p className="text-sm text-[#888]">Riot House • Scottsdale</p>
+              </div>
             ))}
-          </div>
-          <div className="ff-marquee-track" aria-hidden="true">
-            {Array.from({length:12}).map((_,i) => (
-              <span key={i} className="text-[#C4C4C4]">Arizona • Old Town • VIP Tables • Bar Crawls • House Music • Culture •</span>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* NEWSLETTER (placeholder wiring; we’ll hook Supabase/Resend next) */}
-      <section className="max-w-screen-xl mx-auto px-5 md:px-8">
-        <div className="ff-grid items-center">
-          <div className="col-span-12 md:col-span-6">
-            <p className="ff-eyebrow">Newsletter</p>
-            <h3 className="font-display text-2xl md:text-3xl mt-2">Be first to know.</h3>
-            <p className="text-[#C4C4C4] mt-2">Guestlist drops, special events, and early RSVP windows.</p>
-          </div>
-          <form onSubmit={(e)=>e.preventDefault()} className="col-span-12 md:col-span-6 mt-4 md:mt-0 flex gap-2">
-            <input className="w-full rounded-xl bg-[#151515] border border-white/10 px-4 py-3" placeholder="your@email.com" />
-            <button className="ff-cta">Join</button>
-          </form>
-        </div>
+         </div>
       </section>
     </div>
   )
