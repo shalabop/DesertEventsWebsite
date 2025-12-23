@@ -8,7 +8,8 @@ export function Preloader() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 2000) // 2 second fake load
+    // Keep the loader visible for 2.5 seconds to show off the animation
+    const timer = setTimeout(() => setLoading(false), 2500)
     return () => clearTimeout(timer)
   }, [])
 
@@ -17,16 +18,34 @@ export function Preloader() {
       {loading && (
         <motion.div
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.8, ease: "easeInOut" }}
           className="fixed inset-0 z-[100] flex items-center justify-center bg-[#0B0B0B]"
+          style={{ perspective: "1000px" }} // Essential for the 3D effect
         >
           <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-            className="w-24 h-24"
+            initial={{ scale: 0.5, rotateY: 0, opacity: 0 }}
+            animate={{ 
+              scale: [0.5, 1.2, 1.5],     // Grows "out of the screen"
+              rotateY: [0, 180, 360],    // Full 3D spin
+              opacity: [0, 1, 1]         // Fades in quickly
+            }}
+            transition={{ 
+              duration: 2,               // Duration of one cycle
+              ease: "easeInOut", 
+              times: [0, 0.5, 1],        // Keyframe timing
+              repeat: Infinity,          // Loops until loaded
+              repeatDelay: 0 
+            }}
+            className="w-32 h-32 md:w-48 md:h-48 relative preserve-3d"
           >
-             {/* Make sure you have this image or use de-alt.png */}
-            <Image src="/de-badge.png" alt="Loading" width={96} height={96} />
+            {/* Using the badge logo for the best spin effect */}
+            <Image 
+              src="/de-badge.png" 
+              alt="Loading" 
+              fill
+              className="object-contain drop-shadow-[0_0_15px_rgba(50,243,106,0.4)]" 
+              priority
+            />
           </motion.div>
         </motion.div>
       )}

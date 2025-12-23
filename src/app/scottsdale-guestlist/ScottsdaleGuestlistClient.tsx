@@ -15,7 +15,7 @@ const schema = z.object({
   venue: z.string().min(1, "Pick a venue"),
   date: z.string().min(1, "Pick a date"),
   // CHANGED: Removed { invalid_type_error } to prevent build error
-  party_size: z.number().int().positive("Party size must be > 0"),
+  party_size: z.coerce.number().int("Party size must be a whole number").positive("Party size must be > 0"),
   intent: z.enum(["guestlist","table"]),
   budget_range: z.string().default(""),
   arrival_window: z.string().default(""),

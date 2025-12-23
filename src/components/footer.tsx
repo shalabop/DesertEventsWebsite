@@ -36,7 +36,7 @@ export function Footer() {
         <div>
           <div className="font-semibold mb-3 text-white">Social</div>
           <ul className="space-y-2 text-[#C4C4C4]">
-            <li><a className="hover:text-[#32F36A] transition-colors" href="https://instagram.com" target="_blank">Instagram</a></li>
+            <li><a className="hover:text-[#32F36A] transition-colors" href="https://www.instagram.com/deserteventsarizona/" target="_blank">Instagram</a></li>
             <li><a className="hover:text-[#32F36A] transition-colors" href="https://tiktok.com" target="_blank">TikTok</a></li>
             <li><a className="hover:text-[#32F36A] transition-colors" href="https://linkedin.com" target="_blank">LinkedIn</a></li>
             <li><a className="hover:text-[#32F36A] transition-colors" href="https://youtube.com" target="_blank">YouTube</a></li>

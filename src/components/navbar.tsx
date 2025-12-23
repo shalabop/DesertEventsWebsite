@@ -20,7 +20,7 @@ export function Navbar() {
     <header className="sticky top-0 z-50 border-b border-white/10 backdrop-blur bg-[#0B0B0B]/70">
       <div className="max-w-screen-xl mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3" aria-label="Desert Events Home">
-          <Image src="/de-alt.png" alt="Desert Events" width={120} height={32} priority />
+          <Image src="/de-badge.png" alt="Desert Events" width={120} height={32} priority />
         </Link>
         <nav className="hidden lg:flex items-center gap-6 text-sm">
           {links.map((l) => {
