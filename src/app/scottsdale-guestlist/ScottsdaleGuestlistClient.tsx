@@ -7,14 +7,14 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { submitLead } from "@/app/actions/submitLead"
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion"
 
-// FIX: Removed .optional() where .default() is used, and removed coerce to be strict about numbers.
+// FIX: Simplified z.number() to avoid strict type errors during build
 const schema = z.object({
   name: z.string().min(2, "Name is required"),
   phone: z.string().min(7, "Phone is required"),
   email: z.string().email("Invalid email"),
   venue: z.string().min(1, "Pick a venue"),
   date: z.string().min(1, "Pick a date"),
-  party_size: z.number({ invalid_type_error: "Party size is required" }).int().positive("Party size must be > 0"),
+  party_size: z.number().int().positive("Party size must be > 0"),
   intent: z.enum(["guestlist","table"]),
   budget_range: z.string().default(""),
   arrival_window: z.string().default(""),
