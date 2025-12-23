@@ -223,4 +223,4 @@ export default function ScottsdaleGuestlistClient() {
       </section>
     </div>
   )
-}
+}// Fixed build error manually
