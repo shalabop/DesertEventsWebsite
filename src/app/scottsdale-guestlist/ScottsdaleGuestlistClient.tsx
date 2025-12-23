@@ -7,22 +7,19 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { submitLead } from "@/app/actions/submitLead"
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion"
 
-// FIX: Strictly typed schema for Vercel build
+// FIX: Use z.coerce.number() to handle HTML inputs automatically
 const schema = z.object({
   name: z.string().min(2, "Name is required"),
   phone: z.string().min(7, "Phone is required"),
   email: z.string().email("Invalid email"),
   venue: z.string().min(1, "Pick a venue"),
   date: z.string().min(1, "Pick a date"),
-  // CHANGED: Removed { invalid_type_error } to prevent build error
-  party_size: z.coerce.number().int("Party size must be a whole number").positive("Party size must be > 0"),
+  party_size: z.coerce.number().int().positive().min(1, "Party size must be > 0"),
   intent: z.enum(["guestlist","table"]),
   budget_range: z.string().default(""),
   arrival_window: z.string().default(""),
   notes: z.string().default(""),
 })
-
-type FormValues = z.infer<typeof schema>
 
 const VENUES = [
   { name: "Riot House", vibe: "EDM/hip-hop, high energy", img: "/venues/riot-house.jpg" },
@@ -35,18 +32,24 @@ export default function ScottsdaleGuestlistClient() {
   const [result, setResult] = useState<{ok:boolean; error?:string}>()
   const [pending, startTransition] = useTransition()
   
-  const form = useForm<FormValues>({
+  // FIX: Removed <FormValues> generic. Letting TS infer the type prevents the build error.
+  const form = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
-      intent: "guestlist",
+      intent: "guestlist" as const,
       party_size: 4,
       venue: VENUES[0].name,
+      name: "",
+      phone: "",
+      email: "",
+      date: "",
       budget_range: "",
       arrival_window: "",
       notes: ""
     }
   })
   
+  // Watch requires explicit casting sometimes if inference is tricky, but usually fine here
   const intent = form.watch("intent")
 
   return (
@@ -112,26 +115,34 @@ export default function ScottsdaleGuestlistClient() {
                 startTransition(async () => {
                   const res = await submitLead({ ...values, source_page: "scottsdale-guestlist" })
                   setResult(res as any)
-                  if (res.ok) form.reset({ intent: "guestlist", party_size: 4, venue: VENUES[0].name, budget_range:"", arrival_window:"", notes:"" })
+                  if (res.ok) {
+                    form.reset({ 
+                      intent: "guestlist", 
+                      party_size: 4, 
+                      venue: VENUES[0].name,
+                      name: "", phone: "", email: "", date: "",
+                      budget_range:"", arrival_window:"", notes:"" 
+                    })
+                  }
                 })
               })} className="grid md:grid-cols-2 gap-6">
                
                <div className="space-y-2">
                   <label className="text-sm text-[#C4C4C4]">Full Name</label>
                   <input className="w-full bg-[#1A1A1A] border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-[#32F36A]" {...form.register("name")} />
-                  {form.formState.errors.name && <p className="text-red-400 text-xs">{form.formState.errors.name.message}</p>}
+                  {form.formState.errors.name && <p className="text-red-400 text-xs">{form.formState.errors.name.message as string}</p>}
                </div>
 
                <div className="space-y-2">
                   <label className="text-sm text-[#C4C4C4]">Phone</label>
                   <input className="w-full bg-[#1A1A1A] border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-[#32F36A]" {...form.register("phone")} />
-                  {form.formState.errors.phone && <p className="text-red-400 text-xs">{form.formState.errors.phone.message}</p>}
+                  {form.formState.errors.phone && <p className="text-red-400 text-xs">{form.formState.errors.phone.message as string}</p>}
                </div>
 
                <div className="md:col-span-2 space-y-2">
                   <label className="text-sm text-[#C4C4C4]">Email</label>
                   <input className="w-full bg-[#1A1A1A] border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-[#32F36A]" {...form.register("email")} />
-                  {form.formState.errors.email && <p className="text-red-400 text-xs">{form.formState.errors.email.message}</p>}
+                  {form.formState.errors.email && <p className="text-red-400 text-xs">{form.formState.errors.email.message as string}</p>}
                </div>
 
                 <div className="space-y-2">
@@ -144,14 +155,14 @@ export default function ScottsdaleGuestlistClient() {
                <div className="space-y-2">
                   <label className="text-sm text-[#C4C4C4]">Date</label>
                   <input type="date" className="w-full bg-[#1A1A1A] border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-[#32F36A] [color-scheme:dark]" {...form.register("date")} />
-                  {form.formState.errors.date && <p className="text-red-400 text-xs">{form.formState.errors.date.message}</p>}
+                  {form.formState.errors.date && <p className="text-red-400 text-xs">{form.formState.errors.date.message as string}</p>}
                </div>
 
                 <div className="space-y-2">
                   <label className="text-sm text-[#C4C4C4]">Party Size</label>
                   <input type="number" min={1} className="w-full bg-[#1A1A1A] border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-[#32F36A]" 
-                    {...form.register("party_size", { valueAsNumber: true })} />
-                  {form.formState.errors.party_size && <p className="text-red-400 text-xs">{form.formState.errors.party_size.message}</p>}
+                    {...form.register("party_size")} />
+                  {form.formState.errors.party_size && <p className="text-red-400 text-xs">{form.formState.errors.party_size.message as string}</p>}
                </div>
 
                <div className="md:col-span-2 space-y-2">
@@ -223,4 +234,4 @@ export default function ScottsdaleGuestlistClient() {
       </section>
     </div>
   )
-}// Fixed build error manually
+}
