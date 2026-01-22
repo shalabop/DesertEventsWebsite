@@ -17,7 +17,7 @@ export default function HomePage() {
     <div className="space-y-24 md:space-y-32">
       {/* HERO */}
       <section className="relative rounded-2xl overflow-hidden min-h-[85vh] flex items-center">
-        <video className="absolute inset-0 w-full h-full object-cover" autoPlay muted loop playsInline poster="/de-badge.gif">
+        <video className="absolute inset-0 w-full h-full object-cover" autoPlay muted loop playsInline poster="/de-badge.png">
           <source src="/hero.mp4" type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-gradient-to-t from-[#0B0B0B] via-[#0B0B0B]/40 to-transparent" />
