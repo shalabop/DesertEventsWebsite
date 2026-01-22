@@ -6,7 +6,7 @@ export default function TableworthyPage() {
   return (
     <div className="space-y-20 pb-20">
       <section className="relative rounded-2xl overflow-hidden min-h-[50vh] flex items-center px-8">
-        <Image src="/gallery/4.jpg" alt="Tableworthy" fill className="object-cover brightness-[0.4]" />
+        <Image src="/gallery/TW.png" alt="Tableworthy" fill className="object-cover brightness-[0.4]" />
         <div className="relative z-10 max-w-3xl">
           <h1 className="font-display text-5xl md:text-7xl mb-4">Tableworthy</h1>
           <p className="text-xl text-[#C4C4C4]">Hospitality marketing connecting influencers, restaurants, and brands through curated experiences.</p>

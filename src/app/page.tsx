@@ -6,10 +6,10 @@ import { motion } from "framer-motion"
 
 // Strictly the 4 main brands
 const brands = [
-  { title: "Scottsdale GuestList", href: "/scottsdale-guestlist", img: "/gallery/1.jpg", blurb: "Priority entry & VIP tables" },
-  { title: "Le Tour De Crawl", href: "/le-tour-de-crawl", img: "/gallery/2.jpg", blurb: "National bar crawls" },
+  { title: "Scottsdale GuestList", href: "/scottsdale-guestlist", img: "/gallery/GuestListGL.png", blurb: "Priority entry & VIP tables" },
+  { title: "Le Tour De Crawl", href: "/le-tour-de-crawl", img: "/gallery/letourdecrawl.png", blurb: "National bar crawls" },
   { title: "Society Sessions", href: "/society-sessions", img: "/gallery/3.jpg", blurb: "House-music community" },
-  { title: "Tableworthy", href: "/tableworthy", img: "/gallery/4.jpg", blurb: "Influencer hospitality" },
+  { title: "Tableworthy", href: "/tableworthy", img: "/gallery/TW.png", blurb: "Influencer hospitality" },
 ]
 
 export default function HomePage() {
@@ -17,7 +17,7 @@ export default function HomePage() {
     <div className="space-y-24 md:space-y-32">
       {/* HERO */}
       <section className="relative rounded-2xl overflow-hidden min-h-[85vh] flex items-center">
-        <video className="absolute inset-0 w-full h-full object-cover" autoPlay muted loop playsInline poster="/hero.jpg">
+        <video className="absolute inset-0 w-full h-full object-cover" autoPlay muted loop playsInline poster="/de-badge.gif">
           <source src="/hero.mp4" type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-gradient-to-t from-[#0B0B0B] via-[#0B0B0B]/40 to-transparent" />
