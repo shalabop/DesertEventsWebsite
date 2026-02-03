@@ -1,7 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { createEvent, updateEvent, deleteEvent, getEvents, verifyAdminPassword, EventData, EventType } from "@/app/actions/events"
+import { useState, useEffect, useRef } from "react"
+import Image from "next/image"
+import { createEvent, updateEvent, deleteEvent, getEvents, verifyAdminPassword, uploadEventImage, EventData, EventType } from "@/app/actions/events"
 
 const eventTypes: { value: EventType; label: string }[] = [
   { value: "le-tour-de-crawl", label: "Le Tour De Crawl" },
@@ -25,8 +26,11 @@ export default function AdminEventsPage() {
   const [authError, setAuthError] = useState("")
   const [events, setEvents] = useState<EventData[]>([])
   const [loading, setLoading] = useState(false)
+  const [uploadingImage, setUploadingImage] = useState(false)
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
   const [editingEvent, setEditingEvent] = useState<EventData | null>(null)
+  const [imageSource, setImageSource] = useState<"gallery" | "upload">("gallery")
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [formData, setFormData] = useState<EventData>({
     title: "",
@@ -42,21 +46,29 @@ export default function AdminEventsPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    const isValid = await verifyAdminPassword(password)
-    if (isValid) {
-      setIsAuthenticated(true)
-      setAuthError("")
-      loadEvents()
-    } else {
-      setAuthError("Invalid password")
+    setAuthError("")
+    try {
+      const isValid = await verifyAdminPassword(password)
+      if (isValid) {
+        setIsAuthenticated(true)
+        loadEvents()
+      } else {
+        setAuthError("Invalid password")
+      }
+    } catch (err) {
+      setAuthError("Connection error. Please try again.")
     }
   }
 
   const loadEvents = async () => {
     setLoading(true)
-    const result = await getEvents()
-    if (result.ok) {
-      setEvents(result.data)
+    try {
+      const result = await getEvents()
+      if (result.ok) {
+        setEvents(result.data)
+      }
+    } catch (err) {
+      console.error("Failed to load events:", err)
     }
     setLoading(false)
   }
@@ -74,6 +86,39 @@ export default function AdminEventsPage() {
       ticket_link: "#"
     })
     setEditingEvent(null)
+    setImageSource("gallery")
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
+  }
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setUploadingImage(true)
+    setMessage(null)
+
+    try {
+      const formDataUpload = new FormData()
+      formDataUpload.append("file", file)
+
+      const result = await uploadEventImage(formDataUpload, password)
+
+      if (result.ok && result.url) {
+        setFormData({ ...formData, image: result.url })
+        setMessage({ type: "success", text: "Image uploaded successfully!" })
+      } else {
+        setMessage({ type: "error", text: result.error || "Failed to upload image" })
+        // Reset file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ""
+        }
+      }
+    } catch (err: any) {
+      setMessage({ type: "error", text: err?.message || "Failed to upload image" })
+    }
+    setUploadingImage(false)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -81,19 +126,23 @@ export default function AdminEventsPage() {
     setLoading(true)
     setMessage(null)
 
-    let result
-    if (editingEvent?.id) {
-      result = await updateEvent(editingEvent.id, formData, password)
-    } else {
-      result = await createEvent(formData, password)
-    }
+    try {
+      let result
+      if (editingEvent?.id) {
+        result = await updateEvent(editingEvent.id, formData, password)
+      } else {
+        result = await createEvent(formData, password)
+      }
 
-    if (result.ok) {
-      setMessage({ type: "success", text: editingEvent ? "Event updated!" : "Event created!" })
-      resetForm()
-      loadEvents()
-    } else {
-      setMessage({ type: "error", text: result.error || "Failed to save event" })
+      if (result.ok) {
+        setMessage({ type: "success", text: editingEvent ? "Event updated!" : "Event created!" })
+        resetForm()
+        loadEvents()
+      } else {
+        setMessage({ type: "error", text: result.error || "Failed to save event" })
+      }
+    } catch (err: any) {
+      setMessage({ type: "error", text: err?.message || "An error occurred. Please try again." })
     }
     setLoading(false)
   }
@@ -111,6 +160,9 @@ export default function AdminEventsPage() {
       description: event.description,
       ticket_link: event.ticket_link
     })
+    // Check if image is from gallery or uploaded
+    const isGalleryImage = defaultImages.some(img => img.value === event.image)
+    setImageSource(isGalleryImage ? "gallery" : "upload")
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
@@ -118,12 +170,16 @@ export default function AdminEventsPage() {
     if (!confirm("Are you sure you want to delete this event?")) return
 
     setLoading(true)
-    const result = await deleteEvent(id, password)
-    if (result.ok) {
-      setMessage({ type: "success", text: "Event deleted!" })
-      loadEvents()
-    } else {
-      setMessage({ type: "error", text: result.error || "Failed to delete event" })
+    try {
+      const result = await deleteEvent(id, password)
+      if (result.ok) {
+        setMessage({ type: "success", text: "Event deleted!" })
+        loadEvents()
+      } else {
+        setMessage({ type: "error", text: result.error || "Failed to delete event" })
+      }
+    } catch (err: any) {
+      setMessage({ type: "error", text: err?.message || "Failed to delete event" })
     }
     setLoading(false)
   }
@@ -275,18 +331,72 @@ export default function AdminEventsPage() {
                 </select>
               </div>
 
-              {/* Image */}
-              <div>
-                <label className="block text-sm text-[#888] mb-1">Image</label>
-                <select
-                  value={formData.image}
-                  onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                  className="w-full bg-[#1A1A1A] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#32F36A]"
-                >
-                  {defaultImages.map((img) => (
-                    <option key={img.value} value={img.value}>{img.label}</option>
-                  ))}
-                </select>
+              {/* Image Source Toggle */}
+              <div className="md:col-span-2">
+                <label className="block text-sm text-[#888] mb-2">Event Image</label>
+                <div className="flex gap-4 mb-3">
+                  <button
+                    type="button"
+                    onClick={() => setImageSource("gallery")}
+                    className={`px-4 py-2 rounded-lg text-sm transition-colors ${
+                      imageSource === "gallery"
+                        ? "bg-[#32F36A] text-black"
+                        : "bg-[#1A1A1A] text-[#888] hover:text-white"
+                    }`}
+                  >
+                    Choose from Gallery
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setImageSource("upload")}
+                    className={`px-4 py-2 rounded-lg text-sm transition-colors ${
+                      imageSource === "upload"
+                        ? "bg-[#32F36A] text-black"
+                        : "bg-[#1A1A1A] text-[#888] hover:text-white"
+                    }`}
+                  >
+                    Upload New Image
+                  </button>
+                </div>
+
+                {imageSource === "gallery" ? (
+                  <select
+                    value={formData.image}
+                    onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                    className="w-full bg-[#1A1A1A] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#32F36A]"
+                  >
+                    {defaultImages.map((img) => (
+                      <option key={img.value} value={img.value}>{img.label}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <div className="space-y-3">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      onChange={handleImageUpload}
+                      disabled={uploadingImage}
+                      className="w-full bg-[#1A1A1A] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#32F36A] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[#32F36A] file:text-black file:font-medium file:cursor-pointer"
+                    />
+                    {uploadingImage && (
+                      <p className="text-[#888] text-sm">Uploading image...</p>
+                    )}
+                    <p className="text-[#666] text-xs">Supports JPG, PNG, WebP, GIF. Max 5MB.</p>
+                  </div>
+                )}
+
+                {/* Image Preview */}
+                {formData.image && (
+                  <div className="mt-3 relative w-32 h-20 rounded-lg overflow-hidden">
+                    <Image
+                      src={formData.image}
+                      alt="Preview"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Ticket Link */}
@@ -318,7 +428,7 @@ export default function AdminEventsPage() {
             <div className="flex gap-3 pt-2">
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || uploadingImage}
                 className="flex-1 bg-[#32F36A] text-black font-bold py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50"
               >
                 {loading ? "Saving..." : editingEvent ? "Update Event" : "Add Event"}
@@ -343,7 +453,10 @@ export default function AdminEventsPage() {
           {loading && events.length === 0 ? (
             <p className="text-[#888]">Loading events...</p>
           ) : events.length === 0 ? (
-            <p className="text-[#888]">No events yet. Add your first event above!</p>
+            <div className="text-center py-8">
+              <p className="text-[#888] mb-2">No events yet.</p>
+              <p className="text-[#666] text-sm">Add your first event using the form above!</p>
+            </div>
           ) : (
             <div className="space-y-3">
               {events.map((event) => (
@@ -351,21 +464,32 @@ export default function AdminEventsPage() {
                   key={event.id}
                   className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-[#1A1A1A] rounded-xl border border-white/5"
                 >
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="text-white font-medium truncate">{event.title}</h3>
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-white/10 text-[#888]">
-                        {eventTypes.find(t => t.value === event.type)?.label}
-                      </span>
+                  <div className="flex items-center gap-3 min-w-0">
+                    {/* Thumbnail */}
+                    <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+                      <Image
+                        src={event.image}
+                        alt={event.title}
+                        fill
+                        className="object-cover"
+                      />
                     </div>
-                    <p className="text-[#888] text-sm mt-1">
-                      {new Date(event.date).toLocaleDateString("en-US", {
-                        weekday: "short",
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric"
-                      })} • {event.venue}, {event.city}
-                    </p>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="text-white font-medium truncate">{event.title}</h3>
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-white/10 text-[#888]">
+                          {eventTypes.find(t => t.value === event.type)?.label}
+                        </span>
+                      </div>
+                      <p className="text-[#888] text-sm mt-1">
+                        {new Date(event.date).toLocaleDateString("en-US", {
+                          weekday: "short",
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric"
+                        })} • {event.venue}, {event.city}
+                      </p>
+                    </div>
                   </div>
                   <div className="flex gap-2 flex-shrink-0">
                     <button
@@ -387,15 +511,37 @@ export default function AdminEventsPage() {
           )}
         </div>
 
-        {/* Help Section */}
+        {/* Setup Instructions */}
         <div className="mt-8 p-6 bg-[#111] border border-white/10 rounded-2xl">
-          <h3 className="font-display text-lg text-white mb-3">Quick Tips</h3>
-          <ul className="space-y-2 text-sm text-[#888]">
-            <li>• <strong className="text-white">Date format:</strong> Use the date picker to select the event date</li>
-            <li>• <strong className="text-white">Time format:</strong> Use format like "4:00 PM - 11:00 PM"</li>
-            <li>• <strong className="text-white">Ticket Link:</strong> Paste full URL or use "/scottsdale-guestlist" for internal links</li>
-            <li>• <strong className="text-white">Event Type:</strong> Choose the category that best fits the event</li>
-          </ul>
+          <h3 className="font-display text-lg text-white mb-3">Setup Instructions</h3>
+          <div className="space-y-4 text-sm text-[#888]">
+            <div>
+              <p className="text-white font-medium mb-1">1. Create Events Table (Supabase SQL Editor):</p>
+              <pre className="bg-[#0B0B0B] p-3 rounded-lg overflow-x-auto text-xs">
+{`CREATE TABLE events (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  title TEXT NOT NULL,
+  date DATE NOT NULL,
+  time TEXT NOT NULL,
+  venue TEXT NOT NULL,
+  city TEXT NOT NULL,
+  type TEXT NOT NULL,
+  image TEXT DEFAULT '/gallery/1.jpg',
+  description TEXT NOT NULL,
+  ticket_link TEXT DEFAULT '#',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);`}
+              </pre>
+            </div>
+            <div>
+              <p className="text-white font-medium mb-1">2. For Image Uploads - Create Storage Bucket:</p>
+              <ul className="list-disc list-inside space-y-1 text-[#666]">
+                <li>Go to Supabase → Storage → Create Bucket</li>
+                <li>Name it: <code className="bg-[#0B0B0B] px-1 rounded">event-images</code></li>
+                <li>Make it public (toggle Public bucket)</li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
     </div>

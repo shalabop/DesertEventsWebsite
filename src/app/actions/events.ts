@@ -34,13 +34,15 @@ export async function getEvents() {
 
     if (error) {
       console.error("Error fetching events:", error)
-      return { ok: false, error: error.message, data: [] }
+      // Return empty array instead of error - table might not exist yet
+      return { ok: true, data: [] }
     }
 
     return { ok: true, data: data || [] }
   } catch (err) {
     console.error("Error in getEvents:", err)
-    return { ok: false, error: "Failed to fetch events", data: [] }
+    // Return empty array - database might not be configured
+    return { ok: true, data: [] }
   }
 }
 
@@ -51,6 +53,7 @@ export async function createEvent(event: EventData, password: string) {
 
   try {
     const supabase = getServerSupabase()
+
     const { data, error } = await supabase
       .from("events")
       .insert([{
@@ -69,13 +72,16 @@ export async function createEvent(event: EventData, password: string) {
 
     if (error) {
       console.error("Error creating event:", error)
+      if (error.message.includes("relation") && error.message.includes("does not exist")) {
+        return { ok: false, error: "Database table not set up. Please create the 'events' table in Supabase first." }
+      }
       return { ok: false, error: error.message }
     }
 
     return { ok: true, data }
-  } catch (err) {
+  } catch (err: any) {
     console.error("Error in createEvent:", err)
-    return { ok: false, error: "Failed to create event" }
+    return { ok: false, error: err?.message || "Failed to create event. Check your Supabase configuration." }
   }
 }
 
@@ -109,9 +115,9 @@ export async function updateEvent(id: string, event: Partial<EventData>, passwor
     }
 
     return { ok: true, data }
-  } catch (err) {
+  } catch (err: any) {
     console.error("Error in updateEvent:", err)
-    return { ok: false, error: "Failed to update event" }
+    return { ok: false, error: err?.message || "Failed to update event" }
   }
 }
 
@@ -133,8 +139,64 @@ export async function deleteEvent(id: string, password: string) {
     }
 
     return { ok: true }
-  } catch (err) {
+  } catch (err: any) {
     console.error("Error in deleteEvent:", err)
-    return { ok: false, error: "Failed to delete event" }
+    return { ok: false, error: err?.message || "Failed to delete event" }
+  }
+}
+
+export async function uploadEventImage(formData: FormData, password: string) {
+  if (!await verifyAdminPassword(password)) {
+    return { ok: false, error: "Invalid admin password" }
+  }
+
+  try {
+    const file = formData.get("file") as File
+    if (!file) {
+      return { ok: false, error: "No file provided" }
+    }
+
+    // Validate file type
+    const validTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"]
+    if (!validTypes.includes(file.type)) {
+      return { ok: false, error: "Invalid file type. Please upload a JPG, PNG, WebP, or GIF image." }
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      return { ok: false, error: "File too large. Maximum size is 5MB." }
+    }
+
+    const supabase = getServerSupabase()
+
+    // Generate unique filename
+    const ext = file.name.split(".").pop()
+    const fileName = `event-${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`
+
+    // Upload to Supabase Storage
+    const { data, error } = await supabase.storage
+      .from("event-images")
+      .upload(fileName, file, {
+        cacheControl: "3600",
+        upsert: false
+      })
+
+    if (error) {
+      console.error("Error uploading image:", error)
+      if (error.message.includes("bucket") && error.message.includes("not found")) {
+        return { ok: false, error: "Storage bucket not set up. Please create an 'event-images' bucket in Supabase Storage." }
+      }
+      return { ok: false, error: error.message }
+    }
+
+    // Get public URL
+    const { data: urlData } = supabase.storage
+      .from("event-images")
+      .getPublicUrl(fileName)
+
+    return { ok: true, url: urlData.publicUrl }
+  } catch (err: any) {
+    console.error("Error in uploadEventImage:", err)
+    return { ok: false, error: err?.message || "Failed to upload image" }
   }
 }
