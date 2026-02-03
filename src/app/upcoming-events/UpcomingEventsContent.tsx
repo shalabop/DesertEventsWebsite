@@ -11,177 +11,101 @@ type EventType = "all" | "le-tour-de-crawl" | "society-sessions" | "scottsdale-g
 interface Event {
   id: string
   title: string
-  date: Date
+  date: string
   time: string
   venue: string
   city: string
   type: EventType
   image: string
   description: string
-  ticketLink?: string
+  ticket_link?: string
 }
 
-// Sample events data - this would come from a database in production
-const eventsData: Event[] = [
-  // Le Tour De Crawl events
+// Fallback events data - used when database is empty or unavailable
+const fallbackEvents: Event[] = [
   {
     id: "ltdc-1",
     title: "Ugly Sweater Crawl",
-    date: new Date("2026-12-14"),
+    date: "2026-12-14",
     time: "4:00 PM - 11:00 PM",
     venue: "Downtown District",
     city: "Scottsdale",
     type: "le-tour-de-crawl",
     image: "/gallery/1.jpg",
     description: "Get festive with our annual ugly sweater bar crawl!",
-    ticketLink: "#"
+    ticket_link: "#"
   },
   {
     id: "ltdc-2",
     title: "St. Patrick's Day Crawl",
-    date: new Date("2026-03-17"),
+    date: "2026-03-17",
     time: "2:00 PM - 10:00 PM",
     venue: "Old Town",
     city: "Scottsdale",
     type: "le-tour-de-crawl",
     image: "/gallery/2.jpg",
     description: "The biggest St. Paddy's celebration in Arizona!",
-    ticketLink: "#"
+    ticket_link: "#"
   },
-  {
-    id: "ltdc-3",
-    title: "Summer Kickoff Crawl",
-    date: new Date("2026-05-23"),
-    time: "3:00 PM - 11:00 PM",
-    venue: "Mill Avenue",
-    city: "Tempe",
-    type: "le-tour-de-crawl",
-    image: "/gallery/3.jpg",
-    description: "Start summer right with the ultimate bar crawl experience.",
-    ticketLink: "#"
-  },
-  {
-    id: "ltdc-4",
-    title: "Halloween Costume Crawl",
-    date: new Date("2026-10-31"),
-    time: "6:00 PM - 2:00 AM",
-    venue: "Downtown",
-    city: "Phoenix",
-    type: "le-tour-de-crawl",
-    image: "/gallery/4.jpg",
-    description: "Costumes required! Best costume wins prizes.",
-    ticketLink: "#"
-  },
-  // Society Sessions events
   {
     id: "ss-1",
     title: "Rooftop Sunset Session",
-    date: new Date("2026-02-15"),
+    date: "2026-02-15",
     time: "4:00 PM - 9:00 PM",
     venue: "Canopy Hotel",
     city: "Scottsdale",
     type: "society-sessions",
     image: "/gallery/5.jpg",
     description: "House music with stunning sunset views.",
-    ticketLink: "#"
+    ticket_link: "#"
   },
   {
     id: "ss-2",
     title: "Coffee & Beats",
-    date: new Date("2026-02-22"),
+    date: "2026-02-22",
     time: "10:00 AM - 2:00 PM",
     venue: "Provision Coffee Bar",
     city: "Scottsdale",
     type: "society-sessions",
     image: "/gallery/6.jpg",
     description: "Morning vibes with specialty coffee and deep house.",
-    ticketLink: "#"
+    ticket_link: "#"
   },
-  {
-    id: "ss-3",
-    title: "Pool Party Session",
-    date: new Date("2026-04-12"),
-    time: "12:00 PM - 6:00 PM",
-    venue: "W Hotel",
-    city: "Scottsdale",
-    type: "society-sessions",
-    image: "/gallery/1.jpg",
-    description: "Poolside house music and summer vibes.",
-    ticketLink: "#"
-  },
-  {
-    id: "ss-4",
-    title: "Desert Night Session",
-    date: new Date("2026-03-08"),
-    time: "8:00 PM - 1:00 AM",
-    venue: "The Mint",
-    city: "Phoenix",
-    type: "society-sessions",
-    image: "/gallery/2.jpg",
-    description: "Late night house music experience.",
-    ticketLink: "#"
-  },
-  // Scottsdale Guestlist events
   {
     id: "sg-1",
     title: "VIP Friday at Riot House",
-    date: new Date("2026-02-14"),
+    date: "2026-02-14",
     time: "10:00 PM - 2:00 AM",
     venue: "Riot House",
     city: "Scottsdale",
     type: "scottsdale-guestlist",
     image: "/gallery/3.jpg",
     description: "Priority entry and exclusive VIP tables.",
-    ticketLink: "/scottsdale-guestlist"
+    ticket_link: "/scottsdale-guestlist"
   },
   {
     id: "sg-2",
     title: "Latin Night at El Hefe",
-    date: new Date("2026-02-21"),
+    date: "2026-02-21",
     time: "9:00 PM - 2:00 AM",
     venue: "El Hefe",
     city: "Scottsdale",
     type: "scottsdale-guestlist",
     image: "/gallery/4.jpg",
     description: "Reggaeton and Latin hits all night.",
-    ticketLink: "/scottsdale-guestlist"
+    ticket_link: "/scottsdale-guestlist"
   },
-  {
-    id: "sg-3",
-    title: "Saturday Night at Cake",
-    date: new Date("2026-02-22"),
-    time: "10:00 PM - 3:00 AM",
-    venue: "Cake",
-    city: "Scottsdale",
-    type: "scottsdale-guestlist",
-    image: "/gallery/5.jpg",
-    description: "The ultimate Saturday night club experience.",
-    ticketLink: "/scottsdale-guestlist"
-  },
-  // Other events
   {
     id: "other-1",
     title: "Charity Gala Night",
-    date: new Date("2026-03-15"),
+    date: "2026-03-15",
     time: "7:00 PM - 11:00 PM",
     venue: "Arizona Biltmore",
     city: "Phoenix",
     type: "other",
     image: "/gallery/6.jpg",
     description: "Annual charity gala supporting local causes.",
-    ticketLink: "#"
-  },
-  {
-    id: "other-2",
-    title: "Wine Tasting Experience",
-    date: new Date("2026-04-05"),
-    time: "5:00 PM - 9:00 PM",
-    venue: "Merkin Vineyards",
-    city: "Cottonwood",
-    type: "other",
-    image: "/gallery/1.jpg",
-    description: "Exclusive wine tasting with local vineyards.",
-    ticketLink: "#"
+    ticket_link: "#"
   },
 ]
 
@@ -193,7 +117,8 @@ const filterOptions = [
   { value: "other" as EventType, label: "Other" },
 ]
 
-function formatDate(date: Date): string {
+function formatDate(dateStr: string): string {
+  const date = new Date(dateStr)
   return date.toLocaleDateString("en-US", {
     weekday: "short",
     month: "short",
@@ -201,7 +126,8 @@ function formatDate(date: Date): string {
   }).toUpperCase()
 }
 
-function formatMonthYear(date: Date): string {
+function formatMonthYear(dateStr: string): string {
+  const date = new Date(dateStr)
   return date.toLocaleDateString("en-US", {
     month: "long",
     year: "numeric"
@@ -242,6 +168,28 @@ export default function UpcomingEventsContent() {
   const searchParams = useSearchParams()
   const filterParam = searchParams.get("filter") as EventType | null
   const [activeFilter, setActiveFilter] = useState<EventType>("all")
+  const [events, setEvents] = useState<Event[]>(fallbackEvents)
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Fetch events from database
+  useEffect(() => {
+    async function fetchEvents() {
+      try {
+        const response = await fetch("/api/events")
+        if (response.ok) {
+          const data = await response.json()
+          if (data.events && data.events.length > 0) {
+            setEvents(data.events)
+          }
+        }
+      } catch (error) {
+        console.log("Using fallback events")
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchEvents()
+  }, [])
 
   // Set filter from URL query parameter on mount
   useEffect(() => {
@@ -251,10 +199,10 @@ export default function UpcomingEventsContent() {
   }, [filterParam])
 
   const filteredEvents = useMemo(() => {
-    const sorted = [...eventsData].sort((a, b) => a.date.getTime() - b.date.getTime())
+    const sorted = [...events].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
     if (activeFilter === "all") return sorted
     return sorted.filter(event => event.type === activeFilter)
-  }, [activeFilter])
+  }, [activeFilter, events])
 
   // Group events by month
   const groupedEvents = useMemo(() => {
@@ -328,96 +276,111 @@ export default function UpcomingEventsContent() {
 
       {/* Events Calendar/List Section */}
       <section className="max-w-screen-xl mx-auto px-4 md:px-6">
-        <AnimatePresence mode="wait">
-          {Object.keys(groupedEvents).length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="text-center py-16"
-            >
-              <p className="text-[#888] text-lg">No events found for this filter.</p>
-            </motion.div>
-          ) : (
-            <motion.div
-              key={activeFilter}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-              className="space-y-10 md:space-y-12"
-            >
-              {Object.entries(groupedEvents).map(([monthYear, events]) => (
-                <div key={monthYear}>
-                  <h2 className="font-display text-xl md:text-2xl mb-4 md:mb-6 text-white border-b border-white/10 pb-3">
-                    {monthYear}
-                  </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                    {events.map((event, index) => (
-                      <motion.article
-                        key={event.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        className="group bg-[#111] border border-white/10 rounded-2xl overflow-hidden hover:border-[#32F36A]/50 transition-all duration-300"
-                      >
-                        {/* Event Image */}
-                        <div className="relative h-40 md:h-48 overflow-hidden">
-                          <Image
-                            src={event.image}
-                            alt={event.title}
-                            fill
-                            className="object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-[#111] via-transparent to-transparent" />
-
-                          {/* Event Type Badge */}
-                          <div className={`absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] md:text-xs font-medium border ${getEventTypeColor(event.type)}`}>
-                            {getEventTypeLabel(event.type)}
-                          </div>
-                        </div>
-
-                        {/* Event Details */}
-                        <div className="p-4 md:p-5">
-                          {/* Date & Time */}
-                          <div className="text-[#32F36A] font-mono text-xs md:text-sm mb-2">
-                            {formatDate(event.date)} • {event.time}
-                          </div>
-
-                          {/* Title */}
-                          <h3 className="font-display text-lg md:text-xl text-white mb-2 group-hover:text-[#32F36A] transition-colors">
-                            {event.title}
-                          </h3>
-
-                          {/* Location */}
-                          <p className="text-[#888] text-xs md:text-sm mb-3">
-                            {event.venue} • {event.city}
-                          </p>
-
-                          {/* Description */}
-                          <p className="text-[#666] text-xs md:text-sm mb-4 line-clamp-2">
-                            {event.description}
-                          </p>
-
-                          {/* CTA Button */}
-                          <a
-                            href={event.ticketLink}
-                            className="inline-flex items-center gap-2 text-xs md:text-sm font-medium text-white hover:text-[#32F36A] transition-colors"
-                          >
-                            {event.type === "scottsdale-guestlist" ? "Join Guestlist" : "Get Tickets"}
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                            </svg>
-                          </a>
-                        </div>
-                      </motion.article>
-                    ))}
-                  </div>
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-[#111] border border-white/10 rounded-2xl overflow-hidden animate-pulse">
+                <div className="h-48 bg-white/5" />
+                <div className="p-5 space-y-3">
+                  <div className="h-4 bg-white/5 rounded w-1/2" />
+                  <div className="h-6 bg-white/5 rounded w-3/4" />
+                  <div className="h-4 bg-white/5 rounded w-1/2" />
                 </div>
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <AnimatePresence mode="wait">
+            {Object.keys(groupedEvents).length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="text-center py-16"
+              >
+                <p className="text-[#888] text-lg">No events found for this filter.</p>
+              </motion.div>
+            ) : (
+              <motion.div
+                key={activeFilter}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-10 md:space-y-12"
+              >
+                {Object.entries(groupedEvents).map(([monthYear, monthEvents]) => (
+                  <div key={monthYear}>
+                    <h2 className="font-display text-xl md:text-2xl mb-4 md:mb-6 text-white border-b border-white/10 pb-3">
+                      {monthYear}
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                      {monthEvents.map((event, index) => (
+                        <motion.article
+                          key={event.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.05 }}
+                          className="group bg-[#111] border border-white/10 rounded-2xl overflow-hidden hover:border-[#32F36A]/50 transition-all duration-300"
+                        >
+                          {/* Event Image */}
+                          <div className="relative h-40 md:h-48 overflow-hidden">
+                            <Image
+                              src={event.image}
+                              alt={event.title}
+                              fill
+                              className="object-cover transition-transform duration-500 group-hover:scale-105"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-[#111] via-transparent to-transparent" />
+
+                            {/* Event Type Badge */}
+                            <div className={`absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] md:text-xs font-medium border ${getEventTypeColor(event.type)}`}>
+                              {getEventTypeLabel(event.type)}
+                            </div>
+                          </div>
+
+                          {/* Event Details */}
+                          <div className="p-4 md:p-5">
+                            {/* Date & Time */}
+                            <div className="text-[#32F36A] font-mono text-xs md:text-sm mb-2">
+                              {formatDate(event.date)} • {event.time}
+                            </div>
+
+                            {/* Title */}
+                            <h3 className="font-display text-lg md:text-xl text-white mb-2 group-hover:text-[#32F36A] transition-colors">
+                              {event.title}
+                            </h3>
+
+                            {/* Location */}
+                            <p className="text-[#888] text-xs md:text-sm mb-3">
+                              {event.venue} • {event.city}
+                            </p>
+
+                            {/* Description */}
+                            <p className="text-[#666] text-xs md:text-sm mb-4 line-clamp-2">
+                              {event.description}
+                            </p>
+
+                            {/* CTA Button */}
+                            <a
+                              href={event.ticket_link || "#"}
+                              className="inline-flex items-center gap-2 text-xs md:text-sm font-medium text-white hover:text-[#32F36A] transition-colors"
+                            >
+                              {event.type === "scottsdale-guestlist" ? "Join Guestlist" : "Get Tickets"}
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                              </svg>
+                            </a>
+                          </div>
+                        </motion.article>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        )}
       </section>
 
       {/* CTA Section */}
