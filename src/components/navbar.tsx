@@ -28,97 +28,104 @@ export function Navbar() {
     if (isMobileMenuOpen) {
       document.body.style.overflow = "hidden"
     } else {
-      document.body.style.overflow = "unset"
+      document.body.style.overflow = ""
     }
     return () => {
-      document.body.style.overflow = "unset"
+      document.body.style.overflow = ""
     }
   }, [isMobileMenuOpen])
 
+  const toggleMenu = () => {
+    setIsMobileMenuOpen(prev => !prev)
+  }
+
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 backdrop-blur bg-[#0B0B0B]/70">
-      <div className="max-w-screen-xl mx-auto px-4 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3" aria-label="Desert Events Home">
-          <Image src="/de-badge.png" alt="Desert Events" width={120} height={32} priority />
-        </Link>
-
-        {/* Desktop Navigation */}
-        <nav className="hidden lg:flex items-center gap-6 text-sm">
-          {links.map((l) => {
-            const active = pathname === l.href ||
-              (l.href === "/upcoming-events" && (pathname === "/le-tour-de-crawl" || pathname === "/society-sessions"))
-            return (
-              <Link
-                key={l.href}
-                href={l.href}
-                className={cn(
-                  "text-[#C4C4C4] hover:text-white transition relative",
-                  active && "text-white after:absolute after:-bottom-2 after:left-0 after:h-[2px] after:w-full after:bg-[#32F36A]"
-                )}
-              >
-                {l.label}
-              </Link>
-            )
-          })}
-        </nav>
-
-        {/* Desktop CTA Buttons */}
-        <div className="hidden md:flex items-center gap-2">
-          <Link href="/scottsdale-guestlist#guestlist-form" className="px-5 py-3 rounded-xl border border-white/10 hover:bg-white/5 text-sm">
-            Join Guestlist
+    <>
+      <header className="sticky top-0 z-50 border-b border-white/10 backdrop-blur bg-[#0B0B0B]/90">
+        <div className="max-w-screen-xl mx-auto px-4 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-3" aria-label="Desert Events Home">
+            <Image src="/de-badge.png" alt="Desert Events" width={120} height={32} priority />
           </Link>
-          <Link href="/scottsdale-guestlist#guestlist-form" className="px-5 py-3 rounded-xl bg-[#32F36A] text-black hover:opacity-90 text-sm font-medium">
-            Book Table
-          </Link>
-        </div>
 
-        {/* Mobile Menu Button */}
-        <button
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="lg:hidden p-2 -mr-2 text-white focus:outline-none"
-          aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
-          aria-expanded={isMobileMenuOpen}
-        >
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex items-center gap-6 text-sm">
+            {links.map((l) => {
+              const active = pathname === l.href ||
+                (l.href === "/upcoming-events" && (pathname === "/le-tour-de-crawl" || pathname === "/society-sessions"))
+              return (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  className={cn(
+                    "text-[#C4C4C4] hover:text-white transition relative",
+                    active && "text-white after:absolute after:-bottom-2 after:left-0 after:h-[2px] after:w-full after:bg-[#32F36A]"
+                  )}
+                >
+                  {l.label}
+                </Link>
+              )
+            })}
+          </nav>
+
+          {/* Desktop CTA Buttons */}
+          <div className="hidden lg:flex items-center gap-2">
+            <Link href="/scottsdale-guestlist#guestlist-form" className="px-5 py-3 rounded-xl border border-white/10 hover:bg-white/5 text-sm">
+              Join Guestlist
+            </Link>
+            <Link href="/scottsdale-guestlist#guestlist-form" className="px-5 py-3 rounded-xl bg-[#32F36A] text-black hover:opacity-90 text-sm font-medium">
+              Book Table
+            </Link>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            type="button"
+            onClick={toggleMenu}
+            className="lg:hidden p-2 -mr-2 text-white focus:outline-none z-[60]"
+            aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={isMobileMenuOpen}
           >
-            {isMobileMenuOpen ? (
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            ) : (
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            )}
-          </svg>
-        </button>
-      </div>
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              {isMobileMenuOpen ? (
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              ) : (
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              )}
+            </svg>
+          </button>
+        </div>
+      </header>
 
       {/* Mobile Menu Overlay */}
-      <div
-        className={cn(
-          "fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300",
-          isMobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-        )}
-        onClick={() => setIsMobileMenuOpen(false)}
-      />
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/70 z-[55] lg:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+          aria-hidden="true"
+        />
+      )}
 
       {/* Mobile Menu Panel */}
       <nav
         className={cn(
-          "fixed top-16 right-0 bottom-0 w-full max-w-sm bg-[#0B0B0B] border-l border-white/10 z-50 lg:hidden transform transition-transform duration-300 ease-out overflow-y-auto",
+          "fixed top-16 right-0 bottom-0 w-full max-w-[300px] bg-[#0B0B0B] border-l border-white/10 z-[60] lg:hidden overflow-y-auto transition-transform duration-300 ease-out",
           isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
         )}
+        aria-hidden={!isMobileMenuOpen}
       >
         <div className="flex flex-col p-6">
           {/* Mobile Nav Links */}
@@ -130,6 +137,7 @@ export function Navbar() {
                 <Link
                   key={l.href}
                   href={l.href}
+                  onClick={() => setIsMobileMenuOpen(false)}
                   className={cn(
                     "block px-4 py-3 rounded-xl text-lg transition-colors",
                     active
@@ -147,12 +155,14 @@ export function Navbar() {
           <div className="mt-8 space-y-3">
             <Link
               href="/scottsdale-guestlist#guestlist-form"
-              className="block w-full px-5 py-4 rounded-xl border border-white/10 hover:bg-white/5 text-center font-medium"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block w-full px-5 py-4 rounded-xl border border-white/10 hover:bg-white/5 text-center font-medium text-white"
             >
               Join Guestlist
             </Link>
             <Link
               href="/scottsdale-guestlist#guestlist-form"
+              onClick={() => setIsMobileMenuOpen(false)}
               className="block w-full px-5 py-4 rounded-xl bg-[#32F36A] text-black hover:opacity-90 text-center font-bold"
             >
               Book Table
@@ -165,12 +175,14 @@ export function Navbar() {
             <div className="space-y-2">
               <Link
                 href="/upcoming-events?filter=le-tour-de-crawl"
+                onClick={() => setIsMobileMenuOpen(false)}
                 className="block px-4 py-2 text-sm text-[#888] hover:text-white transition-colors"
               >
                 Le Tour De Crawl Events
               </Link>
               <Link
                 href="/upcoming-events?filter=society-sessions"
+                onClick={() => setIsMobileMenuOpen(false)}
                 className="block px-4 py-2 text-sm text-[#888] hover:text-white transition-colors"
               >
                 Society Sessions Events
@@ -179,6 +191,6 @@ export function Navbar() {
           </div>
         </div>
       </nav>
-    </header>
+    </>
   )
 }
