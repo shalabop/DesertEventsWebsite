@@ -7,8 +7,8 @@ import { motion } from "framer-motion"
 // Strictly the 4 main brands
 const brands = [
   { title: "Scottsdale GuestList", href: "/scottsdale-guestlist", img: "/gallery/GuestListGL.png", blurb: "Priority entry & VIP tables" },
-  { title: "Le Tour De Crawl", href: "/le-tour-de-crawl", img: "/gallery/letourdecrawl.png", blurb: "National bar crawls" },
-  { title: "Society Sessions", href: "/society-sessions", img: "/gallery/3.jpg", blurb: "House-music community" },
+  { title: "Le Tour De Crawl", href: "/upcoming-events?filter=le-tour-de-crawl", img: "/gallery/letourdecrawl.png", blurb: "National bar crawls" },
+  { title: "Society Sessions", href: "/upcoming-events?filter=society-sessions", img: "/gallery/3.jpg", blurb: "House-music community" },
   { title: "Tableworthy", href: "/tableworthy", img: "/gallery/TW.png", blurb: "Influencer hospitality" },
 ]
 
@@ -84,7 +84,7 @@ export default function HomePage() {
       <section className="max-w-screen-xl mx-auto px-6 pb-20">
          <div className="flex justify-between items-end mb-10">
             <h2 className="font-display text-3xl md:text-4xl">Featured Events</h2>
-            <Link href="/scottsdale-guestlist" className="text-[#32F36A] hover:text-white transition-colors">View All →</Link>
+            <Link href="/upcoming-events" className="text-[#32F36A] hover:text-white transition-colors">View All →</Link>
          </div>
          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[1,2,3].map(i => (
