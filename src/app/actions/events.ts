@@ -17,7 +17,6 @@ export interface EventData {
   ticket_link: string
 }
 
-// Simple admin password check - in production use proper auth
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "desertevent2024"
 
 export async function verifyAdminPassword(password: string) {
@@ -32,16 +31,9 @@ export async function getEvents() {
       .select("*")
       .order("date", { ascending: true })
 
-    if (error) {
-      console.error("Error fetching events:", error)
-      // Return empty array instead of error - table might not exist yet
-      return { ok: true, data: [] }
-    }
-
+    if (error) return { ok: true, data: [] }
     return { ok: true, data: data || [] }
-  } catch (err) {
-    console.error("Error in getEvents:", err)
-    // Return empty array - database might not be configured
+  } catch {
     return { ok: true, data: [] }
   }
 }
@@ -51,9 +43,12 @@ export async function createEvent(event: EventData, password: string) {
     return { ok: false, error: "Invalid admin password" }
   }
 
-  try {
-    const supabase = getAdminSupabase()
+  const supabase = getAdminSupabase()
+  if (!supabase) {
+    return { ok: false, error: "SUPABASE_SERVICE_ROLE_KEY is not set. Add it to your Vercel environment variables and redeploy." }
+  }
 
+  try {
     const { data, error } = await supabase
       .from("events")
       .insert([{
@@ -71,17 +66,15 @@ export async function createEvent(event: EventData, password: string) {
       .single()
 
     if (error) {
-      console.error("Error creating event:", error)
       if (error.message.includes("relation") && error.message.includes("does not exist")) {
-        return { ok: false, error: "Database table not set up. Please create the 'events' table in Supabase first." }
+        return { ok: false, error: "The 'events' table does not exist. Run the SQL setup in Supabase first." }
       }
       return { ok: false, error: error.message }
     }
 
     return { ok: true, data }
   } catch (err: any) {
-    console.error("Error in createEvent:", err)
-    return { ok: false, error: err?.message || "Failed to create event. Check your Supabase configuration." }
+    return { ok: false, error: err?.message || "Failed to create event." }
   }
 }
 
@@ -90,8 +83,12 @@ export async function updateEvent(id: string, event: Partial<EventData>, passwor
     return { ok: false, error: "Invalid admin password" }
   }
 
+  const supabase = getAdminSupabase()
+  if (!supabase) {
+    return { ok: false, error: "SUPABASE_SERVICE_ROLE_KEY is not set. Add it to your Vercel environment variables and redeploy." }
+  }
+
   try {
-    const supabase = getAdminSupabase()
     const { data, error } = await supabase
       .from("events")
       .update({
@@ -109,15 +106,10 @@ export async function updateEvent(id: string, event: Partial<EventData>, passwor
       .select()
       .single()
 
-    if (error) {
-      console.error("Error updating event:", error)
-      return { ok: false, error: error.message }
-    }
-
+    if (error) return { ok: false, error: error.message }
     return { ok: true, data }
   } catch (err: any) {
-    console.error("Error in updateEvent:", err)
-    return { ok: false, error: err?.message || "Failed to update event" }
+    return { ok: false, error: err?.message || "Failed to update event." }
   }
 }
 
@@ -126,22 +118,21 @@ export async function deleteEvent(id: string, password: string) {
     return { ok: false, error: "Invalid admin password" }
   }
 
+  const supabase = getAdminSupabase()
+  if (!supabase) {
+    return { ok: false, error: "SUPABASE_SERVICE_ROLE_KEY is not set. Add it to your Vercel environment variables and redeploy." }
+  }
+
   try {
-    const supabase = getAdminSupabase()
     const { error } = await supabase
       .from("events")
       .delete()
       .eq("id", id)
 
-    if (error) {
-      console.error("Error deleting event:", error)
-      return { ok: false, error: error.message }
-    }
-
+    if (error) return { ok: false, error: error.message }
     return { ok: true }
   } catch (err: any) {
-    console.error("Error in deleteEvent:", err)
-    return { ok: false, error: err?.message || "Failed to delete event" }
+    return { ok: false, error: err?.message || "Failed to delete event." }
   }
 }
 
@@ -150,53 +141,44 @@ export async function uploadEventImage(formData: FormData, password: string) {
     return { ok: false, error: "Invalid admin password" }
   }
 
+  const supabase = getAdminSupabase()
+  if (!supabase) {
+    return { ok: false, error: "SUPABASE_SERVICE_ROLE_KEY is not set. Add it to your Vercel environment variables and redeploy." }
+  }
+
   try {
     const file = formData.get("file") as File
-    if (!file) {
-      return { ok: false, error: "No file provided" }
-    }
+    if (!file) return { ok: false, error: "No file provided" }
 
-    // Validate file type
     const validTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"]
     if (!validTypes.includes(file.type)) {
       return { ok: false, error: "Invalid file type. Please upload a JPG, PNG, WebP, or GIF image." }
     }
 
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       return { ok: false, error: "File too large. Maximum size is 5MB." }
     }
 
-    const supabase = getAdminSupabase()
-
-    // Generate unique filename
     const ext = file.name.split(".").pop()
     const fileName = `event-${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`
 
-    // Upload to Supabase Storage
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from("event-images")
-      .upload(fileName, file, {
-        cacheControl: "3600",
-        upsert: false
-      })
+      .upload(fileName, file, { cacheControl: "3600", upsert: false })
 
     if (error) {
-      console.error("Error uploading image:", error)
       if (error.message.includes("bucket") && error.message.includes("not found")) {
-        return { ok: false, error: "Storage bucket not set up. Please create an 'event-images' bucket in Supabase Storage." }
+        return { ok: false, error: "Storage bucket not found. Create an 'event-images' bucket in Supabase Storage." }
       }
       return { ok: false, error: error.message }
     }
 
-    // Get public URL
     const { data: urlData } = supabase.storage
       .from("event-images")
       .getPublicUrl(fileName)
 
     return { ok: true, url: urlData.publicUrl }
   } catch (err: any) {
-    console.error("Error in uploadEventImage:", err)
-    return { ok: false, error: err?.message || "Failed to upload image" }
+    return { ok: false, error: err?.message || "Failed to upload image." }
   }
 }
