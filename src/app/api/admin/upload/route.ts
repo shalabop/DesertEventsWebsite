@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const uploadsDir = path.join(process.cwd(), "public", "uploads")
+    const uploadsDir = path.join("/tmp", "uploads")
     await fs.mkdir(uploadsDir, { recursive: true })
 
     const filename = `upload-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await file.arrayBuffer()
     await fs.writeFile(filePath, new Uint8Array(arrayBuffer))
 
-    return NextResponse.json({ ok: true, url: `/uploads/${filename}` })
+    return NextResponse.json({ ok: true, url: `/api/uploads/${filename}` })
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Upload failed"
     return NextResponse.json({ ok: false, error: message }, { status: 500 })

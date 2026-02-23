@@ -21,7 +21,7 @@ const DEFAULT_CONFIG: AdminConfig = {
   images: { logo: null, heroPoster: null },
 }
 
-const CONFIG_PATH = path.join(process.cwd(), "data", "admin-config.json")
+const CONFIG_PATH = path.join("/tmp", "admin-config.json")
 
 export async function getAdminConfig(): Promise<AdminConfig> {
   try {
