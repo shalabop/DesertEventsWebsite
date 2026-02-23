@@ -9,12 +9,15 @@
   --font-heading: var(--font-space-grotesk), ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans";
   --font-body: var(--font-inter), ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans";
   --font-button: inherit;
+  --font-weight-heading: 400;
+  --font-weight-body: 400;
+  --font-weight-button: 600;
 }
 html,body{ background:#0B0B0B; color:#F5F5F5; margin:0 }
 
 /* Font helpers (tie to CSS variables, which fall back to next/font variables set in layout) */
-.font-display{ font-family: var(--font-heading); }
-body{ font-family: var(--font-body); }
+.font-display{ font-family: var(--font-heading); font-weight: var(--font-weight-heading); }
+body{ font-family: var(--font-body); font-weight: var(--font-weight-body); }
 
 /* Forma-like helpers */
 .ff-grid{ display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:16px; }
@@ -23,7 +26,7 @@ body{ font-family: var(--font-body); }
 
 .ff-img{ width:100%; height:100%; object-fit:cover; border-radius:16px }
 .ff-eyebrow{ letter-spacing:.12em; text-transform:uppercase; color:#C4C4C4; font-size:.72rem }
-.ff-cta{ display:inline-flex; gap:.5rem; align-items:center; justify-content:center; padding:.875rem 1.25rem; border-radius:14px; background:#32F36A; color:#0B0B0B; transition:transform .18s ease, opacity .18s ease; font-weight:600; font-family:var(--font-button); }
+.ff-cta{ display:inline-flex; gap:.5rem; align-items:center; justify-content:center; padding:.875rem 1.25rem; border-radius:14px; background:#32F36A; color:#0B0B0B; transition:transform .18s ease, opacity .18s ease; font-weight:var(--font-weight-button); font-family:var(--font-button); }
 .ff-cta:hover{ transform:translateY(-1px); opacity:.95 }
 .ff-link{ color:#F5F5F5; text-underline-offset:4px }
 .ff-link:hover{ text-decoration:underline }

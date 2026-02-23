@@ -24,16 +24,20 @@ function FontPicker({
   description,
   previewText,
   value,
+  bold,
   fonts,
   onChange,
+  onBoldChange,
 }: {
   slot: FontSlot
   label: string
   description: string
   previewText: string
   value: string | null
+  bold: boolean
   fonts: string[]
   onChange: (slot: FontSlot, font: string | null) => void
+  onBoldChange: (slot: FontSlot, bold: boolean) => void
 }) {
   const [query, setQuery] = useState("")
   const [open, setOpen] = useState(false)
@@ -82,6 +86,12 @@ function FontPicker({
         ? "var(--font-inter), ui-sans-serif"
         : "inherit"
     document.documentElement.style.setProperty(varName, `'${fontName}', ${fallback}`)
+  }
+
+  function handleBoldToggle() {
+    const next = !bold
+    onBoldChange(slot, next)
+    document.documentElement.style.setProperty(`--font-weight-${slot}`, next ? "700" : "400")
   }
 
   function handleSelect(fontName: string) {
@@ -155,13 +165,35 @@ function FontPicker({
         )}
       </div>
 
+      {/* Bold toggle */}
+      <button
+        type="button"
+        onClick={handleBoldToggle}
+        className={`flex items-center gap-2.5 w-fit px-3 py-2 rounded-lg border transition-colors text-sm ${
+          bold
+            ? "bg-[#32F36A]/10 border-[#32F36A] text-[#32F36A]"
+            : "bg-transparent border-white/10 text-[#888] hover:border-white/20 hover:text-white"
+        }`}
+      >
+        <span
+          className={`w-8 h-4 rounded-full relative transition-colors ${bold ? "bg-[#32F36A]" : "bg-[#333]"}`}
+        >
+          <span
+            className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-transform ${
+              bold ? "translate-x-4" : "translate-x-0.5"
+            }`}
+          />
+        </span>
+        Bold
+      </button>
+
       {/* Live preview box */}
       <div
         className="bg-[#0B0B0B] border border-white/5 rounded-xl px-5 py-4 min-h-[60px] flex items-center"
-        style={displayFont ? { fontFamily: displayFont } : undefined}
+        style={displayFont ? { fontFamily: displayFont, fontWeight: bold ? 700 : 400 } : { fontWeight: bold ? 700 : 400 }}
       >
         <span className="text-[#C4C4C4] text-base">
-          {value ? previewText : <span className="text-[#444] italic text-sm">Default font — select above to preview</span>}
+          {value ? previewText : <span className="text-[#444] italic text-sm" style={{ fontWeight: 400 }}>Default font — select above to preview</span>}
         </span>
       </div>
     </div>
@@ -288,7 +320,7 @@ export default function AdminStylePage() {
 
   const [fonts, setFonts] = useState<string[]>([])
   const [config, setConfig] = useState<AdminConfig>({
-    fonts: { heading: null, body: null, button: null },
+    fonts: { heading: null, body: null, button: null, headingBold: false, bodyBold: false, buttonBold: false },
     images: { logo: null, heroPoster: null },
   })
   const [saving, setSaving] = useState(false)
@@ -334,6 +366,10 @@ export default function AdminStylePage() {
     setConfig((prev) => ({ ...prev, fonts: { ...prev.fonts, [slot]: value } }))
   }
 
+  function handleBoldChange(slot: FontSlot, value: boolean) {
+    setConfig((prev) => ({ ...prev, fonts: { ...prev.fonts, [`${slot}Bold`]: value } }))
+  }
+
   function handleImageChange(slot: ImageSlot, value: string | null) {
     setConfig((prev) => ({ ...prev, images: { ...prev.images, [slot]: value } }))
   }
@@ -362,7 +398,7 @@ export default function AdminStylePage() {
   async function handleReset() {
     if (!confirm("Reset all font and image settings to defaults?")) return
     const defaultConfig: AdminConfig = {
-      fonts: { heading: null, body: null, button: null },
+      fonts: { heading: null, body: null, button: null, headingBold: false, bodyBold: false, buttonBold: false },
       images: { logo: null, heroPoster: null },
     }
     setSaving(true)
@@ -379,6 +415,7 @@ export default function AdminStylePage() {
         // Remove live preview CSS vars
         ;(["heading", "body", "button"] as FontSlot[]).forEach((slot) => {
           document.documentElement.style.removeProperty(`--font-${slot}`)
+          document.documentElement.style.removeProperty(`--font-weight-${slot}`)
           document.getElementById(`admin-preview-${slot}`)?.remove()
         })
         setMessage({ type: "success", text: "All settings reset to defaults." })
@@ -477,8 +514,10 @@ export default function AdminStylePage() {
               description="Used for all titles, section headings, brand names (h1, h2, h3)"
               previewText="Arizona's Leading Nightlife Collective"
               value={config.fonts.heading}
+              bold={config.fonts.headingBold}
               fonts={fonts}
               onChange={handleFontChange}
+              onBoldChange={handleBoldChange}
             />
             <div className="border-t border-white/5" />
             <FontPicker
@@ -487,8 +526,10 @@ export default function AdminStylePage() {
               description="Used for paragraphs, descriptions, navigation links, and all general text"
               previewText="Creating culture in the desert — unforgettable nights."
               value={config.fonts.body}
+              bold={config.fonts.bodyBold}
               fonts={fonts}
               onChange={handleFontChange}
+              onBoldChange={handleBoldChange}
             />
             <div className="border-t border-white/5" />
             <FontPicker
@@ -497,8 +538,10 @@ export default function AdminStylePage() {
               description="Used for call-to-action buttons (defaults to body font if left blank)"
               previewText="Join the Guestlist · Book a Table"
               value={config.fonts.button}
+              bold={config.fonts.buttonBold}
               fonts={fonts}
               onChange={handleFontChange}
+              onBoldChange={handleBoldChange}
             />
           </div>
         </section>

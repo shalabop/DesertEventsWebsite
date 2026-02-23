@@ -25,6 +25,9 @@ export async function POST(request: NextRequest) {
         heading: config.fonts?.heading ?? null,
         body: config.fonts?.body ?? null,
         button: config.fonts?.button ?? null,
+        headingBold: config.fonts?.headingBold === true,
+        bodyBold: config.fonts?.bodyBold === true,
+        buttonBold: config.fonts?.buttonBold === true,
       },
       images: {
         logo: config.images?.logo ?? null,

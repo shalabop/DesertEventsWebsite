@@ -6,6 +6,9 @@ export interface AdminConfig {
     heading: string | null
     body: string | null
     button: string | null
+    headingBold: boolean
+    bodyBold: boolean
+    buttonBold: boolean
   }
   images: {
     logo: string | null
@@ -14,7 +17,7 @@ export interface AdminConfig {
 }
 
 const DEFAULT_CONFIG: AdminConfig = {
-  fonts: { heading: null, body: null, button: null },
+  fonts: { heading: null, body: null, button: null, headingBold: false, bodyBold: false, buttonBold: false },
   images: { logo: null, heroPoster: null },
 }
 
