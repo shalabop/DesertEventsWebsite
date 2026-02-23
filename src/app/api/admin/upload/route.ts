@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
-import path from "path"
-import fs from "fs/promises"
 import { verifyAdminPassword } from "@/app/actions/events"
+import { getServerSupabase } from "@/lib/supabase"
 
 const VALID_TYPES: Record<string, string> = {
   "image/jpeg": "jpg",
@@ -11,6 +10,7 @@ const VALID_TYPES: Record<string, string> = {
   "image/gif": "gif",
 }
 const MAX_SIZE = 5 * 1024 * 1024 // 5 MB
+const BUCKET = "admin-uploads"
 
 export async function POST(request: NextRequest) {
   try {
@@ -41,16 +41,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const uploadsDir = path.join("/tmp", "uploads")
-    await fs.mkdir(uploadsDir, { recursive: true })
-
+    const supabase = getServerSupabase()
     const filename = `upload-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-    const filePath = path.join(uploadsDir, filename)
-
     const arrayBuffer = await file.arrayBuffer()
-    await fs.writeFile(filePath, new Uint8Array(arrayBuffer))
 
-    return NextResponse.json({ ok: true, url: `/api/uploads/${filename}` })
+    const { error } = await supabase.storage
+      .from(BUCKET)
+      .upload(filename, new Uint8Array(arrayBuffer), { contentType: file.type })
+
+    if (error) throw new Error(error.message)
+
+    const { data: urlData } = supabase.storage.from(BUCKET).getPublicUrl(filename)
+    return NextResponse.json({ ok: true, url: urlData.publicUrl })
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Upload failed"
     return NextResponse.json({ ok: false, error: message }, { status: 500 })
