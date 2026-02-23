@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import Image from "next/image"
 
 
-export function Preloader() {
+export function Preloader({ logoSrc = "/de-badge.png" }: { logoSrc?: string }) {
   const [loading, setLoading] = useState(true)
 
 
@@ -44,7 +44,7 @@ export function Preloader() {
           >
             {/* Using the badge logo for the best spin effect */}
             <Image
-              src="/de-badge.png"
+              src={logoSrc}
               alt="Loading"
               fill
               className="object-contain drop-shadow-[0_0_15px_rgba(50,243,106,0.4)]"
