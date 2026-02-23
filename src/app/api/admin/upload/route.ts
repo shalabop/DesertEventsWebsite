@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { verifyAdminPassword } from "@/app/actions/events"
-import { getServerSupabase } from "@/lib/supabase"
+import { getServiceSupabase } from "@/lib/supabase"
 
 const VALID_TYPES: Record<string, string> = {
   "image/jpeg": "jpg",
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = getServerSupabase()
+    const supabase = getServiceSupabase()
     const filename = `upload-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
     const arrayBuffer = await file.arrayBuffer()
 

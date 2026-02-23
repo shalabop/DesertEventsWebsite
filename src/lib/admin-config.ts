@@ -1,6 +1,6 @@
 import path from "path"
 import fs from "fs/promises"
-import { getServerSupabase } from "@/lib/supabase"
+import { getServiceSupabase } from "@/lib/supabase"
 
 export interface AdminConfig {
   fonts: {
@@ -25,9 +25,9 @@ const DEFAULT_CONFIG: AdminConfig = {
 // /tmp fallback for local dev without Supabase env vars
 const TMP_CONFIG_PATH = path.join("/tmp", "admin-config.json")
 
-function tryGetSupabase() {
+function tryGetServiceSupabase() {
   try {
-    return getServerSupabase()
+    return getServiceSupabase()
   } catch {
     return null
   }
@@ -41,7 +41,7 @@ function mergeWithDefaults(parsed: Partial<AdminConfig>): AdminConfig {
 }
 
 export async function getAdminConfig(): Promise<AdminConfig> {
-  const supabase = tryGetSupabase()
+  const supabase = tryGetServiceSupabase()
   if (supabase) {
     try {
       const { data, error } = await supabase
@@ -63,7 +63,7 @@ export async function getAdminConfig(): Promise<AdminConfig> {
 }
 
 export async function setAdminConfig(config: AdminConfig): Promise<void> {
-  const supabase = tryGetSupabase()
+  const supabase = tryGetServiceSupabase()
   if (supabase) {
     const { error } = await supabase
       .from("admin_config")
