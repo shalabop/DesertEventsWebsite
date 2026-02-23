@@ -1,6 +1,6 @@
 "use server"
 
-import { getServerSupabase } from "@/lib/supabase"
+import { getServerSupabase, getAdminSupabase } from "@/lib/supabase"
 
 export type EventType = "le-tour-de-crawl" | "society-sessions" | "scottsdale-guestlist" | "other"
 
@@ -52,7 +52,7 @@ export async function createEvent(event: EventData, password: string) {
   }
 
   try {
-    const supabase = getServerSupabase()
+    const supabase = getAdminSupabase()
 
     const { data, error } = await supabase
       .from("events")
@@ -91,7 +91,7 @@ export async function updateEvent(id: string, event: Partial<EventData>, passwor
   }
 
   try {
-    const supabase = getServerSupabase()
+    const supabase = getAdminSupabase()
     const { data, error } = await supabase
       .from("events")
       .update({
@@ -127,7 +127,7 @@ export async function deleteEvent(id: string, password: string) {
   }
 
   try {
-    const supabase = getServerSupabase()
+    const supabase = getAdminSupabase()
     const { error } = await supabase
       .from("events")
       .delete()
@@ -167,7 +167,7 @@ export async function uploadEventImage(formData: FormData, password: string) {
       return { ok: false, error: "File too large. Maximum size is 5MB." }
     }
 
-    const supabase = getServerSupabase()
+    const supabase = getAdminSupabase()
 
     // Generate unique filename
     const ext = file.name.split(".").pop()
