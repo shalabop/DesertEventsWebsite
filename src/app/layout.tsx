@@ -30,7 +30,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           .join("&")}&display=swap`
       : null
 
-  // Build CSS variable override block (only for non-null values)
+  // Build CSS variable override block (only for non-null/non-default values)
   const cssVarLines: string[] = []
   if (config.fonts.heading) {
     cssVarLines.push(`--font-heading: '${config.fonts.heading}', var(--font-space-grotesk), ui-sans-serif, system-ui;`)
@@ -41,6 +41,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   if (config.fonts.button) {
     cssVarLines.push(`--font-button: '${config.fonts.button}', inherit;`)
   }
+  if (config.fonts.headingBold) cssVarLines.push(`--font-weight-heading: 700;`)
+  if (config.fonts.bodyBold) cssVarLines.push(`--font-weight-body: 700;`)
+  if (config.fonts.buttonBold) cssVarLines.push(`--font-weight-button: 700;`)
   const cssVarOverrides =
     cssVarLines.length > 0 ? `:root { ${cssVarLines.join(" ")} }` : ""
 
