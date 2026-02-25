@@ -117,8 +117,16 @@ const filterOptions = [
   { value: "other" as EventType, label: "Other" },
 ]
 
+// Bug fix: new Date("YYYY-MM-DD") parses the string as UTC midnight, which
+// shifts the displayed date one day earlier in US timezones (e.g. UTC-7).
+// Appending "T00:00:00" (no zone suffix) makes JS treat the string as local
+// midnight, so the date always matches what was entered in the admin form.
+function parseLocalDate(dateStr: string): Date {
+  return new Date(dateStr + "T00:00:00")
+}
+
 function formatDate(dateStr: string): string {
-  const date = new Date(dateStr)
+  const date = parseLocalDate(dateStr)
   return date.toLocaleDateString("en-US", {
     weekday: "short",
     month: "short",
@@ -127,7 +135,7 @@ function formatDate(dateStr: string): string {
 }
 
 function formatMonthYear(dateStr: string): string {
-  const date = new Date(dateStr)
+  const date = parseLocalDate(dateStr)
   return date.toLocaleDateString("en-US", {
     month: "long",
     year: "numeric"
@@ -199,7 +207,7 @@ export default function UpcomingEventsContent() {
   }, [filterParam])
 
   const filteredEvents = useMemo(() => {
-    const sorted = [...events].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    const sorted = [...events].sort((a, b) => parseLocalDate(a.date).getTime() - parseLocalDate(b.date).getTime())
     if (activeFilter === "all") return sorted
     return sorted.filter(event => event.type === activeFilter)
   }, [activeFilter, events])
