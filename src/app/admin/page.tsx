@@ -9,7 +9,9 @@ import type { AdminConfig } from "@/lib/admin-config"
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type FontSlot = "heading" | "body" | "button"
-type ImageSlot = "logo" | "heroPoster"
+type ImageSlot = "logo" | "heroPoster" | "heroVideo"
+
+const LS_KEY = "admin-font-draft"
 
 interface Message {
   type: "success" | "error"
@@ -311,6 +313,145 @@ function ImageUploader({
   )
 }
 
+// ─── Video Uploader ────────────────────────────────────────────────────────────
+// Root cause for broken hero video uploads: Vercel serverless functions have a
+// hard 4.5 MB body limit — video files far exceed this.  Fix: the browser
+// uploads directly to Supabase Storage via a presigned URL so the file never
+// passes through the Vercel function.  The API route only returns the URL.
+
+function VideoUploader({
+  label,
+  description,
+  currentUrl,
+  password,
+  onChange,
+}: {
+  label: string
+  description: string
+  currentUrl: string | null
+  password: string
+  onChange: (url: string | null) => void
+}) {
+  const [uploading, setUploading] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [error, setError] = useState<string | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setUploading(true)
+    setError(null)
+    setProgress(0)
+
+    try {
+      // Step 1: get a presigned upload URL from the API (tiny request — no body limit issue).
+      const urlRes = await fetch("/api/admin/video-upload-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password, mimeType: file.type, filename: file.name }),
+      })
+      const urlData = await urlRes.json()
+      if (!urlData.ok) {
+        setError(urlData.error ?? "Could not get upload URL")
+        if (fileRef.current) fileRef.current.value = ""
+        setUploading(false)
+        return
+      }
+
+      // Step 2: PUT the video directly to Supabase Storage — bypasses Vercel body limit.
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest()
+        xhr.open("PUT", urlData.signedUrl)
+        xhr.setRequestHeader("Content-Type", file.type)
+        xhr.upload.onprogress = (ev) => {
+          if (ev.lengthComputable) setProgress(Math.round((ev.loaded / ev.total) * 100))
+        }
+        xhr.onload = () => (xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(`Upload failed: ${xhr.status}`)))
+        xhr.onerror = () => reject(new Error("Network error during upload"))
+        xhr.send(file)
+      })
+
+      onChange(urlData.publicUrl)
+      setProgress(100)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Upload failed. Please try again.")
+      if (fileRef.current) fileRef.current.value = ""
+    }
+    setUploading(false)
+  }
+
+  function handleReset() {
+    onChange(null)
+    if (fileRef.current) fileRef.current.value = ""
+    setError(null)
+    setProgress(0)
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <div>
+          <label className="block text-sm font-medium text-white">{label}</label>
+          <p className="text-xs text-[#666] mt-0.5">{description}</p>
+        </div>
+        {currentUrl && (
+          <button
+            type="button"
+            onClick={handleReset}
+            className="text-xs text-[#888] hover:text-red-400 transition-colors px-2 py-1 rounded"
+          >
+            ✕ Reset
+          </button>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <input
+          ref={fileRef}
+          type="file"
+          accept="video/mp4,video/webm,video/quicktime,video/ogg"
+          onChange={handleFileChange}
+          disabled={uploading}
+          className="w-full text-sm text-[#888] file:mr-3 file:py-1.5 file:px-4 file:rounded-lg file:border-0 file:bg-[#32F36A] file:text-black file:font-medium file:cursor-pointer file:text-sm hover:file:opacity-90 disabled:opacity-50"
+        />
+        <p className="text-[#555] text-xs">
+          MP4, WebM, MOV or OGG · Uploaded directly to storage (no size cap from Vercel).
+          Recommended max: 500 MB.
+        </p>
+
+        {uploading && (
+          <div className="space-y-1">
+            <div className="w-full bg-[#1A1A1A] rounded-full h-1.5">
+              <div
+                className="bg-[#32F36A] h-1.5 rounded-full transition-all duration-300"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+            <p className="text-[#888] text-xs">{progress < 100 ? `Uploading… ${progress}%` : "Finalising…"}</p>
+          </div>
+        )}
+
+        {error && <p className="text-red-400 text-xs">{error}</p>}
+
+        {currentUrl && !uploading && (
+          <div className="space-y-1">
+            <p className="text-[#32F36A] text-xs">✓ Video saved</p>
+            <video
+              src={currentUrl}
+              className="w-full max-h-32 rounded-lg object-cover bg-[#1A1A1A]"
+              muted
+              playsInline
+              preload="metadata"
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ─── Main Admin Page ──────────────────────────────────────────────────────────
 
 export default function AdminStylePage() {
@@ -321,7 +462,7 @@ export default function AdminStylePage() {
   const [fonts, setFonts] = useState<string[]>([])
   const [config, setConfig] = useState<AdminConfig>({
     fonts: { heading: null, body: null, button: null, headingBold: false, bodyBold: false, buttonBold: false },
-    images: { logo: null, heroPoster: null },
+    images: { logo: null, heroPoster: null, heroVideo: null },
   })
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<Message | null>(null)
@@ -343,18 +484,31 @@ export default function AdminStylePage() {
   }
 
   const loadData = useCallback(async () => {
-    // Load current config
+    // Load current config — cache: 'no-store' ensures we always get the latest
+    // saved values after a page refresh, not a stale cached response.
     try {
-      const res = await fetch("/api/admin/config")
+      const res = await fetch("/api/admin/config", { cache: "no-store" })
       const data = await res.json()
-      setConfig(data)
+      setConfig((prev) => {
+        // Merge the persisted server config with any unsaved draft in localStorage
+        // so the user's in-progress font selections survive a page refresh.
+        let draft: Partial<AdminConfig["fonts"]> = {}
+        try {
+          const raw = localStorage.getItem(LS_KEY)
+          if (raw) draft = JSON.parse(raw)
+        } catch { /* ignore */ }
+        return {
+          ...data,
+          fonts: { ...data.fonts, ...draft },
+        }
+      })
     } catch {
       // ignore — defaults are already set
     }
 
     // Load font list
     try {
-      const res = await fetch("/api/admin/fonts")
+      const res = await fetch("/api/admin/fonts", { cache: "no-store" })
       const data = await res.json()
       if (Array.isArray(data.fonts)) setFonts(data.fonts)
     } catch {
@@ -363,11 +517,21 @@ export default function AdminStylePage() {
   }, [])
 
   function handleFontChange(slot: FontSlot, value: string | null) {
-    setConfig((prev) => ({ ...prev, fonts: { ...prev.fonts, [slot]: value } }))
+    setConfig((prev) => {
+      const next = { ...prev, fonts: { ...prev.fonts, [slot]: value } }
+      // Persist the in-progress font draft to localStorage so it survives a
+      // page refresh even if the user hasn't clicked "Save Changes" yet.
+      try { localStorage.setItem(LS_KEY, JSON.stringify(next.fonts)) } catch { /* ignore */ }
+      return next
+    })
   }
 
   function handleBoldChange(slot: FontSlot, value: boolean) {
-    setConfig((prev) => ({ ...prev, fonts: { ...prev.fonts, [`${slot}Bold`]: value } }))
+    setConfig((prev) => {
+      const next = { ...prev, fonts: { ...prev.fonts, [`${slot}Bold`]: value } }
+      try { localStorage.setItem(LS_KEY, JSON.stringify(next.fonts)) } catch { /* ignore */ }
+      return next
+    })
   }
 
   function handleImageChange(slot: ImageSlot, value: string | null) {
@@ -385,7 +549,9 @@ export default function AdminStylePage() {
       })
       const data = await res.json()
       if (data.ok) {
-        setMessage({ type: "success", text: "Settings saved! Refresh any page to see the changes applied globally." })
+        // Clear the in-progress draft now that the server has the canonical state.
+        try { localStorage.removeItem(LS_KEY) } catch { /* ignore */ }
+        setMessage({ type: "success", text: "Settings saved! Changes are now live across the whole site." })
       } else {
         setMessage({ type: "error", text: data.error ?? "Failed to save settings." })
       }
@@ -399,7 +565,7 @@ export default function AdminStylePage() {
     if (!confirm("Reset all font and image settings to defaults?")) return
     const defaultConfig: AdminConfig = {
       fonts: { heading: null, body: null, button: null, headingBold: false, bodyBold: false, buttonBold: false },
-      images: { logo: null, heroPoster: null },
+      images: { logo: null, heroPoster: null, heroVideo: null },
     }
     setSaving(true)
     setMessage(null)
@@ -412,6 +578,7 @@ export default function AdminStylePage() {
       const data = await res.json()
       if (data.ok) {
         setConfig(defaultConfig)
+        try { localStorage.removeItem(LS_KEY) } catch { /* ignore */ }
         // Remove live preview CSS vars
         ;(["heading", "body", "button"] as FontSlot[]).forEach((slot) => {
           document.documentElement.style.removeProperty(`--font-${slot}`)
@@ -572,6 +739,14 @@ export default function AdminStylePage() {
               defaultUrl="/hero.jpg"
               password={password}
               onChange={handleImageChange}
+            />
+            <div className="border-t border-white/5" />
+            <VideoUploader
+              label="Hero Video"
+              description="Background video that autoplays on the homepage hero section. Uploaded directly to storage — no Vercel size limit applies."
+              currentUrl={config.images.heroVideo}
+              password={password}
+              onChange={(url) => handleImageChange("heroVideo", url)}
             />
           </div>
         </section>
