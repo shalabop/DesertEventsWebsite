@@ -15,6 +15,23 @@
 }
 html,body{ background:#0B0B0B; color:#F5F5F5; margin:0 }
 
+/* ── Custom green cursor (matches project accent #32F36A) ────────────────── */
+/* Applied to all elements so the green arrow appears across every page,      */
+/* including admin panels. The hotspot is at (0 0) — the arrow tip.           */
+*,
+*::before,
+*::after {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M4 1 L4 19 L8 14.5 L11 21.5 L13.5 20.5 L10.5 13.5 L16 13.5 Z' fill='%2332F36A' stroke='%23000000' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E") 0 0, auto;
+}
+a, button, [role="button"], select, label[for],
+input[type="submit"], input[type="reset"], input[type="button"] {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M4 1 L4 19 L8 14.5 L11 21.5 L13.5 20.5 L10.5 13.5 L16 13.5 Z' fill='%2332F36A' stroke='%23000000' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E") 0 0, pointer;
+}
+input[type="text"], input[type="password"], input[type="email"],
+input[type="search"], input[type="date"], textarea {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M4 1 L4 19 L8 14.5 L11 21.5 L13.5 20.5 L10.5 13.5 L16 13.5 Z' fill='%2332F36A' stroke='%23000000' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E") 0 0, text;
+}
+
 /* Font helpers (tie to CSS variables, which fall back to next/font variables set in layout) */
 .font-display{ font-family: var(--font-heading); font-weight: var(--font-weight-heading); }
 body{ font-family: var(--font-body); font-weight: var(--font-weight-body); }

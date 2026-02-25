@@ -14,12 +14,14 @@ export interface AdminConfig {
   images: {
     logo: string | null
     heroPoster: string | null
+    /** Public URL of the hero section background video uploaded via the admin panel. */
+    heroVideo: string | null
   }
 }
 
 const DEFAULT_CONFIG: AdminConfig = {
   fonts: { heading: null, body: null, button: null, headingBold: false, bodyBold: false, buttonBold: false },
-  images: { logo: null, heroPoster: null },
+  images: { logo: null, heroPoster: null, heroVideo: null },
 }
 
 // /tmp fallback for local dev without Supabase env vars
