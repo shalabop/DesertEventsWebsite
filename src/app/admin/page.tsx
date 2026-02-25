@@ -679,7 +679,7 @@ export default function AdminStylePage() {
               slot="heading"
               label="Heading Font"
               description="Used for all titles, section headings, brand names (h1, h2, h3)"
-              previewText="Arizona's Leading Nightlife Collective"
+              previewText="Now you know."
               value={config.fonts.heading}
               bold={config.fonts.headingBold}
               fonts={fonts}

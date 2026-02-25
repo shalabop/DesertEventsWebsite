@@ -44,7 +44,7 @@ export function HeroSection({
           transition={{ delay: 0.3 }}
           className="font-display text-5xl md:text-7xl lg:text-8xl leading-[1] max-w-4xl text-white mb-6"
         >
-          Arizona's Leading <br /> Nightlife & Event <br /> Collective
+          Now you know.
         </motion.h1>
         <motion.div
           initial={{ opacity: 0 }}
