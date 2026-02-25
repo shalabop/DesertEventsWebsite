@@ -482,7 +482,10 @@ export default function AdminEventsPage() {
                         </span>
                       </div>
                       <p className="text-[#888] text-sm mt-1">
-                        {new Date(event.date).toLocaleDateString("en-US", {
+                        {/* Fix: append T00:00:00 so the YYYY-MM-DD string is
+                            parsed as local midnight, not UTC midnight, preventing
+                            a one-day-off display in US timezones. */
+                        new Date(event.date + "T00:00:00").toLocaleDateString("en-US", {
                           weekday: "short",
                           month: "short",
                           day: "numeric",
