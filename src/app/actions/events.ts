@@ -150,8 +150,17 @@ export async function uploadEventImage(formData: FormData, password: string) {
     const file = formData.get("file") as File
     if (!file) return { ok: false, error: "No file provided" }
 
-    const validTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"]
-    if (!validTypes.includes(file.type)) {
+    // Map MIME types to extensions — PNG must be explicit so Supabase sets the
+    // correct Content-Type header (otherwise it defaults to application/octet-stream).
+    const VALID_TYPES: Record<string, string> = {
+      "image/jpeg": "jpg",
+      "image/jpg":  "jpg",
+      "image/png":  "png",
+      "image/webp": "webp",
+      "image/gif":  "gif",
+    }
+    const ext = VALID_TYPES[file.type]
+    if (!ext) {
       return { ok: false, error: "Invalid file type. Please upload a JPG, PNG, WebP, or GIF image." }
     }
 
@@ -159,12 +168,11 @@ export async function uploadEventImage(formData: FormData, password: string) {
       return { ok: false, error: "File too large. Maximum size is 5MB." }
     }
 
-    const ext = file.name.split(".").pop()
     const fileName = `event-${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`
 
     const { error } = await supabase.storage
       .from("event-images")
-      .upload(fileName, file, { cacheControl: "3600", upsert: false })
+      .upload(fileName, file, { contentType: file.type, cacheControl: "3600", upsert: false })
 
     if (error) {
       if (error.message.includes("bucket") && error.message.includes("not found")) {
