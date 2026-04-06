@@ -6,7 +6,7 @@ import { HeroSection } from "@/components/hero-section"
 // Strictly the 4 main brands
 const brands = [
   { title: "Scottsdale GuestList", href: "/scottsdale-guestlist", img: "/gallery/GuestListGL.png", blurb: "Priority entry & VIP tables" },
-  { title: "Le Tour De Crawl", href: "/upcoming-events?filter=le-tour-de-crawl", img: "/gallery/letourdecrawl.png", blurb: "National bar crawls" },
+  { title: "Bar Crawling", href: "/upcoming-events?filter=le-tour-de-crawl", img: "/gallery/BarCrawling2.png", blurb: "National bar crawls" },
   { title: "Society Sessions", href: "/upcoming-events?filter=society-sessions", img: "/gallery/3.jpg", blurb: "House-music community" },
   { title: "Tableworthy", href: "/tableworthy", img: "/gallery/TW.png", blurb: "Influencer hospitality" },
 ]
