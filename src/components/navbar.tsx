@@ -51,7 +51,7 @@ export function Navbar({ logoSrc = "/de-badge.png" }: { logoSrc?: string }) {
           <nav className="hidden lg:flex items-center gap-6 text-sm">
             {links.map((l) => {
               const active = pathname === l.href ||
-                (l.href === "/upcoming-events" && (pathname === "/le-tour-de-crawl" || pathname === "/society-sessions"))
+                (l.href === "/upcoming-events" && (pathname === "/bar-crawling" || pathname === "/society-sessions"))
               return (
                 <Link
                   key={l.href}
@@ -132,7 +132,7 @@ export function Navbar({ logoSrc = "/de-badge.png" }: { logoSrc?: string }) {
           <div className="space-y-1">
             {links.map((l) => {
               const active = pathname === l.href ||
-                (l.href === "/upcoming-events" && (pathname === "/le-tour-de-crawl" || pathname === "/society-sessions"))
+                (l.href === "/upcoming-events" && (pathname === "/bar-crawling" || pathname === "/society-sessions"))
               return (
                 <Link
                   key={l.href}
@@ -178,7 +178,7 @@ export function Navbar({ logoSrc = "/de-badge.png" }: { logoSrc?: string }) {
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="block px-4 py-2 text-sm text-[#888] hover:text-white transition-colors"
               >
-                Le Tour De Crawl Events
+                Bar Crawling Events
               </Link>
               <Link
                 href="/upcoming-events?filter=society-sessions"

@@ -32,7 +32,7 @@ export function Footer() {
             <div className="font-semibold mb-3 text-white">Brands</div>
             <ul className="space-y-2 text-[#C4C4C4]">
               <li><Link className="hover:text-[#32F36A] transition-colors" href="/scottsdale-guestlist">Scottsdale GuestList</Link></li>
-              <li><Link className="hover:text-[#32F36A] transition-colors" href="/upcoming-events?filter=le-tour-de-crawl">Le Tour De Crawl</Link></li>
+              <li><Link className="hover:text-[#32F36A] transition-colors" href="/upcoming-events?filter=le-tour-de-crawl">Bar Crawling</Link></li>
               <li><Link className="hover:text-[#32F36A] transition-colors" href="/upcoming-events?filter=society-sessions">Society Sessions</Link></li>
               <li><Link className="hover:text-[#32F36A] transition-colors" href="/tableworthy">Tableworthy</Link></li>
             </ul>

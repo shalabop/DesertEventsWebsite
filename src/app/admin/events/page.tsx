@@ -5,7 +5,7 @@ import Image from "next/image"
 import { createEvent, updateEvent, deleteEvent, getEvents, verifyAdminPassword, uploadEventImage, EventData, EventType } from "@/app/actions/events"
 
 const eventTypes: { value: EventType; label: string }[] = [
-  { value: "le-tour-de-crawl", label: "Le Tour De Crawl" },
+  { value: "le-tour-de-crawl", label: "Bar Crawling" },
   { value: "society-sessions", label: "Society Sessions" },
   { value: "scottsdale-guestlist", label: "Scottsdale Guestlist" },
   { value: "other", label: "Other" },

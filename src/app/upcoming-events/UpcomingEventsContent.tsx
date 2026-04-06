@@ -24,7 +24,7 @@ interface Event {
 // Fallback events data - used when database is empty or unavailable
 const fallbackEvents: Event[] = [
   {
-    id: "ltdc-1",
+    id: "bc-1",
     title: "Ugly Sweater Crawl",
     date: "2026-12-14",
     time: "4:00 PM - 11:00 PM",
@@ -36,7 +36,7 @@ const fallbackEvents: Event[] = [
     ticket_link: "#"
   },
   {
-    id: "ltdc-2",
+    id: "bc-2",
     title: "St. Patrick's Day Crawl",
     date: "2026-03-17",
     time: "2:00 PM - 10:00 PM",
@@ -111,7 +111,7 @@ const fallbackEvents: Event[] = [
 
 const filterOptions = [
   { value: "all" as EventType, label: "All Events" },
-  { value: "le-tour-de-crawl" as EventType, label: "Le Tour De Crawl" },
+  { value: "le-tour-de-crawl" as EventType, label: "Bar Crawling" },
   { value: "society-sessions" as EventType, label: "Society Sessions" },
   { value: "scottsdale-guestlist" as EventType, label: "Scottsdale Guestlist" },
   { value: "other" as EventType, label: "Other" },
@@ -145,7 +145,7 @@ function formatMonthYear(dateStr: string): string {
 function getEventTypeLabel(type: EventType): string {
   switch (type) {
     case "le-tour-de-crawl":
-      return "Le Tour De Crawl"
+      return "Bar Crawling"
     case "society-sessions":
       return "Society Sessions"
     case "scottsdale-guestlist":
