@@ -5,7 +5,7 @@ import Link from "next/link"
 import { submitCrawlHost } from "@/app/actions/forms"
 import { useState } from "react"
 
-export default function LeTourClient() {
+export default function BarCrawlingClient() {
   const [status, setStatus] = useState<"idle"|"loading"|"success">("idle")
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -31,7 +31,7 @@ export default function LeTourClient() {
           <div className="ff-vignette" />
         </div>
         <div className="relative z-10 px-4 md:px-8 pt-12 pb-16 md:pt-24 md:pb-28 max-w-screen-xl mx-auto">
-          <p className="ff-eyebrow text-xs md:text-sm">Le Tour De Crawl</p>
+          <p className="ff-eyebrow text-xs md:text-sm">Bar Crawling</p>
           <h1 className="font-display text-2xl sm:text-3xl md:text-5xl leading-[1.1] max-w-4xl mt-2">
             Bar Crawls That Bring the Country Together.
           </h1>
@@ -79,14 +79,14 @@ export default function LeTourClient() {
           <div className="grid md:grid-cols-2 gap-8 items-start">
             <div>
               <p className="ff-eyebrow text-xs">Host a Crawl</p>
-              <h2 className="font-display text-xl md:text-3xl mt-2">Bring Le Tour De Crawl to your city.</h2>
+              <h2 className="font-display text-xl md:text-3xl mt-2">Bring Bar Crawling to your city.</h2>
               <p className="text-[#C4C4C4] mt-3 text-sm md:text-base">Tell us your city, venues, and ideal dates. Our team will reach out to discuss partnership opportunities.</p>
             </div>
 
             {status === "success" ? (
               <div className="bg-[#32F36A]/10 border border-[#32F36A] rounded-xl p-6 text-center">
                 <div className="text-[#32F36A] font-display text-xl mb-2">Thanks!</div>
-                <p className="text-[#C4C4C4] text-sm">We'll reach out within 48 hours to discuss bringing Le Tour De Crawl to your city.</p>
+                <p className="text-[#C4C4C4] text-sm">We'll reach out within 48 hours to discuss bringing Bar Crawling to your city.</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-3">
