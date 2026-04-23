@@ -4,12 +4,19 @@ import { useState, useEffect, useRef, useCallback } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { verifyAdminPassword } from "@/app/actions/events"
+import { DEFAULT_CONFIG } from "@/lib/admin-config"
 import type { AdminConfig } from "@/lib/admin-config"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type FontSlot = "heading" | "body" | "button"
-type ImageSlot = "logo" | "heroPoster" | "heroVideo"
+type ImageSlot =
+  | "logo"
+  | "heroPoster"
+  | "heroVideo"
+  | "nightlifeLogo"
+  | "nightlifeHeroPoster"
+  | "nightlifeHeroVideo"
 
 const LS_KEY = "admin-font-draft"
 
@@ -460,10 +467,7 @@ export default function AdminStylePage() {
   const [authError, setAuthError] = useState("")
 
   const [fonts, setFonts] = useState<string[]>([])
-  const [config, setConfig] = useState<AdminConfig>({
-    fonts: { heading: null, body: null, button: null, headingBold: false, bodyBold: false, buttonBold: false },
-    images: { logo: null, heroPoster: null, heroVideo: null },
-  })
+  const [config, setConfig] = useState<AdminConfig>(DEFAULT_CONFIG)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<Message | null>(null)
 
@@ -498,8 +502,10 @@ export default function AdminStylePage() {
           if (raw) draft = JSON.parse(raw)
         } catch { /* ignore */ }
         return {
+          ...DEFAULT_CONFIG,
           ...data,
-          fonts: { ...data.fonts, ...draft },
+          fonts: { ...DEFAULT_CONFIG.fonts, ...data.fonts, ...draft },
+          images: { ...DEFAULT_CONFIG.images, ...data.images },
         }
       })
     } catch {
@@ -563,10 +569,7 @@ export default function AdminStylePage() {
 
   async function handleReset() {
     if (!confirm("Reset all font and image settings to defaults?")) return
-    const defaultConfig: AdminConfig = {
-      fonts: { heading: null, body: null, button: null, headingBold: false, bodyBold: false, buttonBold: false },
-      images: { logo: null, heroPoster: null, heroVideo: null },
-    }
+    const defaultConfig: AdminConfig = DEFAULT_CONFIG
     setSaving(true)
     setMessage(null)
     try {
