@@ -18,8 +18,9 @@ export function Navbar({ logoSrc = "/de-badge.png" }: { logoSrc?: string }) {
   const pathname = usePathname()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
-  // Close mobile menu on route change
+  // Close mobile menu on route change — setState in effect is intentional here.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMobileMenuOpen(false)
   }, [pathname])
 

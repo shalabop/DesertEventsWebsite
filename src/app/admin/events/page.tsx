@@ -47,16 +47,31 @@ export default function AdminEventsPage() {
     hover_video: null,
   })
 
+  const loadEvents = async () => {
+    setLoading(true)
+    try {
+      const result = await getEvents()
+      if (result.ok) {
+        setEvents(result.data)
+      } else {
+        setMessage({ type: "error", text: result.error ?? "Failed to load events." })
+      }
+    } catch (err: unknown) {
+      setMessage({ type: "error", text: err instanceof Error ? err.message : "Failed to load events." })
+    }
+    setLoading(false)
+  }
+
   // Auto-login if session password exists (shared with /admin)
   useEffect(() => {
     const stored = getStoredAdminPassword()
     if (stored) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPassword(stored)
       verifyAdminPassword(stored).then((valid) => {
         if (valid) { setIsAuthenticated(true); loadEvents() }
       }).catch(() => { /* ignore */ })
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -74,21 +89,6 @@ export default function AdminEventsPage() {
     } catch {
       setAuthError("Connection error. Please try again.")
     }
-  }
-
-  const loadEvents = async () => {
-    setLoading(true)
-    try {
-      const result = await getEvents()
-      if (result.ok) {
-        setEvents(result.data)
-      } else {
-        setMessage({ type: "error", text: result.error ?? "Failed to load events." })
-      }
-    } catch (err: unknown) {
-      setMessage({ type: "error", text: err instanceof Error ? err.message : "Failed to load events." })
-    }
-    setLoading(false)
   }
 
   const resetForm = () => {

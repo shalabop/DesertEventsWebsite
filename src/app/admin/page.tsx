@@ -507,7 +507,7 @@ export default function AdminStylePage() {
     try {
       const res = await fetch("/api/admin/config", { cache: "no-store" })
       const data = await res.json()
-      setConfig((prev) => {
+      setConfig(() => {
         // Merge the persisted server config with any unsaved draft in localStorage
         // so the user's in-progress font selections survive a page refresh.
         let draft: Partial<AdminConfig["fonts"]> = {}
@@ -897,7 +897,7 @@ export default function AdminStylePage() {
         <section className="bg-[#111] border border-white/10 rounded-2xl p-6">
           <h2 className="font-display text-xl text-white mb-4">Save Changes</h2>
           <p className="text-[#666] text-sm mb-5">
-            Clicking "Save Changes" will apply your font and image selections to every page on the site.
+            Clicking &ldquo;Save Changes&rdquo; will apply your font and image selections to every page on the site.
             You can always reset back to the original defaults.
           </p>
           <div className="flex flex-col sm:flex-row gap-3">

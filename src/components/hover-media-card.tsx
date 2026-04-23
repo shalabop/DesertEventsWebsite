@@ -57,6 +57,7 @@ export function HoverMediaCard({
       tabIndex={hoverVideoUrl ? 0 : undefined}
     >
       {/* Static image */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={imageUrl}
         alt={imageAlt}

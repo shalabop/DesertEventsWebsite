@@ -12,7 +12,7 @@ export default function BarCrawlingClient() {
     e.preventDefault()
     setStatus("loading")
     const formData = new FormData(e.currentTarget)
-    const res = await submitCrawlHost(formData)
+    const res = await submitCrawlHost(Object.fromEntries(formData))
     if (res.ok) {
       setStatus("success")
       e.currentTarget.reset()
@@ -86,7 +86,7 @@ export default function BarCrawlingClient() {
             {status === "success" ? (
               <div className="bg-[#32F36A]/10 border border-[#32F36A] rounded-xl p-6 text-center">
                 <div className="text-[#32F36A] font-display text-xl mb-2">Thanks!</div>
-                <p className="text-[#C4C4C4] text-sm">We'll reach out within 48 hours to discuss bringing Bar Crawling to your city.</p>
+                <p className="text-[#C4C4C4] text-sm">We&apos;ll reach out within 48 hours to discuss bringing Bar Crawling to your city.</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-3">

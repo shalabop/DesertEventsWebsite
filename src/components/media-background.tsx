@@ -49,6 +49,7 @@ export function MediaBackground({
     <div className={`relative overflow-hidden ${className}`}>
       {/* Static poster / fallback image */}
       {posterUrl && (
+        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={posterUrl}
           alt=""

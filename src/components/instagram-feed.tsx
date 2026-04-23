@@ -95,6 +95,7 @@ export function InstagramFeed({ config }: Props) {
                 aria-label={post.caption ? post.caption.slice(0, 80) : "View Instagram post"}
               >
                 {thumb ? (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={thumb}
                     alt={post.caption?.slice(0, 80) ?? "Instagram post"}
