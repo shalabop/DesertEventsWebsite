@@ -4,8 +4,8 @@ import { useState, useEffect, useRef, useCallback } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { verifyAdminPassword } from "@/app/actions/events"
-import { DEFAULT_CONFIG } from "@/lib/admin-config"
-import type { AdminConfig } from "@/lib/admin-config"
+import { DEFAULT_CONFIG } from "@/lib/admin-config-defaults"
+import type { AdminConfig } from "@/lib/admin-config-defaults"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

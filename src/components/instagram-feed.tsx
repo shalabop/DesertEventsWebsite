@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import type { InstagramMediaItem } from "@/app/api/instagram/route"
-import type { AdminConfig } from "@/lib/admin-config"
+import type { AdminConfig } from "@/lib/admin-config-defaults"
 
 interface Props {
   config: AdminConfig["instagram"]

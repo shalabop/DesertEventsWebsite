@@ -19,6 +19,7 @@
     "types": [
       "node"
     ],
+    "ignoreDeprecations": "5.0",
     "baseUrl": ".",
     "paths": {
       "@/*": [

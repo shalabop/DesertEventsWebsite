@@ -9,7 +9,7 @@ import { submitLead } from "@/app/actions/submitLead"
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion"
 import { MediaBackground } from "@/components/media-background"
 import { HoverMediaCard } from "@/components/hover-media-card"
-import type { AdminConfig, VenueConfig } from "@/lib/admin-config"
+import type { AdminConfig, VenueConfig } from "@/lib/admin-config-defaults"
 
 const schema = z.object({
   name: z.string().min(2, "Name is required"),

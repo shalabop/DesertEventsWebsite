@@ -1,85 +1,13 @@
+/** Server-only module — uses fs and Supabase. Do not import in client components. */
 import path from "path"
 import fs from "fs/promises"
 import { getServiceSupabase } from "@/lib/supabase"
 
-export interface VenueConfig {
-  name: string
-  vibe: string
-  img: string
-  hoverVideo?: string | null
-}
+export type { VenueConfig, InstagramPost, AdminConfig } from "@/lib/admin-config-defaults"
+export { DEFAULT_CONFIG } from "@/lib/admin-config-defaults"
 
-export interface InstagramPost {
-  url: string
-  label?: string
-}
-
-export interface AdminConfig {
-  fonts: {
-    heading: string | null
-    body: string | null
-    button: string | null
-    headingBold: boolean
-    bodyBold: boolean
-    buttonBold: boolean
-  }
-  images: {
-    logo: string | null
-    heroPoster: string | null
-    /** Public URL of the homepage hero background video. */
-    heroVideo: string | null
-    /** Logo shown on the Nightlife / Scottsdale Guestlist page. */
-    nightlifeLogo: string | null
-    /** Hero poster for the Nightlife page. */
-    nightlifeHeroPoster: string | null
-    /** Hero background video for the Nightlife page. */
-    nightlifeHeroVideo: string | null
-  }
-  /** Ordered list of participating venues on the Nightlife page. */
-  venues: VenueConfig[]
-  nightlife: {
-    heading: string
-    subheading: string
-  }
-  instagram: {
-    enabled: boolean
-    heading: string
-    postsCount: number
-    /** Manual fallback posts shown when env vars are missing. */
-    fallbackPosts: InstagramPost[]
-  }
-}
-
-const DEFAULT_VENUES: VenueConfig[] = [
-  { name: "Riot House", vibe: "EDM/hip-hop, high energy", img: "/venues/riot-house.jpg", hoverVideo: null },
-  { name: "El Hefe", vibe: "Latin + party crowd", img: "/venues/el-hefe.jpg", hoverVideo: null },
-  { name: "Cake", vibe: "Nightclub atmosphere, VIP tables", img: "/venues/cake.jpg", hoverVideo: null },
-  { name: "Whiskey Row", vibe: "Country crossover", img: "/venues/whiskey-row.jpg", hoverVideo: null },
-  { name: "Maya", vibe: "Upscale lounge, bottle service", img: "/venues/maya.jpg", hoverVideo: null },
-]
-
-export const DEFAULT_CONFIG: AdminConfig = {
-  fonts: { heading: null, body: null, button: null, headingBold: false, bodyBold: false, buttonBold: false },
-  images: {
-    logo: null,
-    heroPoster: null,
-    heroVideo: null,
-    nightlifeLogo: null,
-    nightlifeHeroPoster: null,
-    nightlifeHeroVideo: null,
-  },
-  venues: DEFAULT_VENUES,
-  nightlife: {
-    heading: "Nightlife",
-    subheading: "Priority entry & bottle service at Old Town's top venues.",
-  },
-  instagram: {
-    enabled: false,
-    heading: "Follow the Party",
-    postsCount: 9,
-    fallbackPosts: [],
-  },
-}
+import type { AdminConfig } from "@/lib/admin-config-defaults"
+import { DEFAULT_CONFIG } from "@/lib/admin-config-defaults"
 
 const TMP_CONFIG_PATH = path.join("/tmp", "admin-config.json")
 
@@ -93,6 +21,8 @@ function tryGetServiceSupabase() {
 
 function mergeWithDefaults(parsed: Partial<AdminConfig>): AdminConfig {
   return {
+    ...DEFAULT_CONFIG,
+    ...parsed,
     fonts: { ...DEFAULT_CONFIG.fonts, ...parsed.fonts },
     images: { ...DEFAULT_CONFIG.images, ...parsed.images },
     venues: Array.isArray(parsed.venues) && parsed.venues.length > 0
