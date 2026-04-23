@@ -15,6 +15,8 @@ export interface EventData {
   image: string
   description: string
   ticket_link: string
+  /** Optional hover video URL shown when mousing over the event card. */
+  hover_video?: string | null
 }
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "desertevent2024"
@@ -23,18 +25,29 @@ export async function verifyAdminPassword(password: string) {
   return password === ADMIN_PASSWORD
 }
 
-export async function getEvents() {
+export async function getEvents(): Promise<{ ok: boolean; data: EventData[]; error?: string }> {
+  const supabase = getServerSupabase()
+  if (!supabase) {
+    return { ok: false, data: [], error: "SUPABASE_URL or SUPABASE_ANON_KEY is not configured." }
+  }
+
   try {
-    const supabase = getServerSupabase()
     const { data, error } = await supabase
       .from("events")
       .select("*")
       .order("date", { ascending: true })
 
-    if (error) return { ok: true, data: [] }
+    if (error) {
+      if (error.message.includes("relation") && error.message.includes("does not exist")) {
+        return { ok: false, data: [], error: "The 'events' table does not exist. Run the SQL setup in Supabase." }
+      }
+      return { ok: false, data: [], error: error.message }
+    }
+
     return { ok: true, data: data || [] }
-  } catch {
-    return { ok: true, data: [] }
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Unknown error fetching events."
+    return { ok: false, data: [], error: msg }
   }
 }
 
@@ -45,7 +58,7 @@ export async function createEvent(event: EventData, password: string) {
 
   const supabase = getAdminSupabase()
   if (!supabase) {
-    return { ok: false, error: "SUPABASE_SERVICE_ROLE_KEY is not set. Add it to your Vercel environment variables and redeploy." }
+    return { ok: false, error: "SUPABASE_SERVICE_ROLE_KEY is not set. Add it to your environment variables and redeploy." }
   }
 
   try {
@@ -60,7 +73,8 @@ export async function createEvent(event: EventData, password: string) {
         type: event.type,
         image: event.image || "/gallery/1.jpg",
         description: event.description,
-        ticket_link: event.ticket_link || "#"
+        ticket_link: event.ticket_link || "#",
+        hover_video: event.hover_video ?? null,
       }])
       .select()
       .single()
@@ -73,8 +87,8 @@ export async function createEvent(event: EventData, password: string) {
     }
 
     return { ok: true, data }
-  } catch (err: any) {
-    return { ok: false, error: err?.message || "Failed to create event." }
+  } catch (err: unknown) {
+    return { ok: false, error: err instanceof Error ? err.message : "Failed to create event." }
   }
 }
 
@@ -85,7 +99,7 @@ export async function updateEvent(id: string, event: Partial<EventData>, passwor
 
   const supabase = getAdminSupabase()
   if (!supabase) {
-    return { ok: false, error: "SUPABASE_SERVICE_ROLE_KEY is not set. Add it to your Vercel environment variables and redeploy." }
+    return { ok: false, error: "SUPABASE_SERVICE_ROLE_KEY is not set. Add it to your environment variables and redeploy." }
   }
 
   try {
@@ -100,7 +114,8 @@ export async function updateEvent(id: string, event: Partial<EventData>, passwor
         type: event.type,
         image: event.image,
         description: event.description,
-        ticket_link: event.ticket_link
+        ticket_link: event.ticket_link,
+        hover_video: event.hover_video ?? null,
       })
       .eq("id", id)
       .select()
@@ -108,8 +123,8 @@ export async function updateEvent(id: string, event: Partial<EventData>, passwor
 
     if (error) return { ok: false, error: error.message }
     return { ok: true, data }
-  } catch (err: any) {
-    return { ok: false, error: err?.message || "Failed to update event." }
+  } catch (err: unknown) {
+    return { ok: false, error: err instanceof Error ? err.message : "Failed to update event." }
   }
 }
 
@@ -120,7 +135,7 @@ export async function deleteEvent(id: string, password: string) {
 
   const supabase = getAdminSupabase()
   if (!supabase) {
-    return { ok: false, error: "SUPABASE_SERVICE_ROLE_KEY is not set. Add it to your Vercel environment variables and redeploy." }
+    return { ok: false, error: "SUPABASE_SERVICE_ROLE_KEY is not set. Add it to your environment variables and redeploy." }
   }
 
   try {
@@ -131,8 +146,8 @@ export async function deleteEvent(id: string, password: string) {
 
     if (error) return { ok: false, error: error.message }
     return { ok: true }
-  } catch (err: any) {
-    return { ok: false, error: err?.message || "Failed to delete event." }
+  } catch (err: unknown) {
+    return { ok: false, error: err instanceof Error ? err.message : "Failed to delete event." }
   }
 }
 
@@ -143,15 +158,13 @@ export async function uploadEventImage(formData: FormData, password: string) {
 
   const supabase = getAdminSupabase()
   if (!supabase) {
-    return { ok: false, error: "SUPABASE_SERVICE_ROLE_KEY is not set. Add it to your Vercel environment variables and redeploy." }
+    return { ok: false, error: "SUPABASE_SERVICE_ROLE_KEY is not set. Add it to your environment variables and redeploy." }
   }
 
   try {
     const file = formData.get("file") as File
     if (!file) return { ok: false, error: "No file provided" }
 
-    // Map MIME types to extensions — PNG must be explicit so Supabase sets the
-    // correct Content-Type header (otherwise it defaults to application/octet-stream).
     const VALID_TYPES: Record<string, string> = {
       "image/jpeg": "jpg",
       "image/jpg":  "jpg",
@@ -176,7 +189,7 @@ export async function uploadEventImage(formData: FormData, password: string) {
 
     if (error) {
       if (error.message.includes("bucket") && error.message.includes("not found")) {
-        return { ok: false, error: "Storage bucket not found. Create an 'event-images' bucket in Supabase Storage." }
+        return { ok: false, error: "Storage bucket 'event-images' not found. Create it in Supabase Storage." }
       }
       return { ok: false, error: error.message }
     }
@@ -186,7 +199,7 @@ export async function uploadEventImage(formData: FormData, password: string) {
       .getPublicUrl(fileName)
 
     return { ok: true, url: urlData.publicUrl }
-  } catch (err: any) {
-    return { ok: false, error: err?.message || "Failed to upload image." }
+  } catch (err: unknown) {
+    return { ok: false, error: err instanceof Error ? err.message : "Failed to upload image." }
   }
 }

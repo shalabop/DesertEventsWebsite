@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 
 const links = [
   { href: "/", label: "Home" },
-  { href: "/scottsdale-guestlist", label: "Scottsdale GuestList" },
+  { href: "/scottsdale-guestlist", label: "Nightlife" },
   { href: "/upcoming-events", label: "Upcoming Events" },
   { href: "/tableworthy", label: "Tableworthy" },
   { href: "/about", label: "About" },
