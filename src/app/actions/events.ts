@@ -26,7 +26,12 @@ export async function verifyAdminPassword(password: string) {
 }
 
 export async function getEvents(): Promise<{ ok: boolean; data: EventData[]; error?: string }> {
-  const supabase = getServerSupabase()
+  let supabase: ReturnType<typeof getServerSupabase>
+  try {
+    supabase = getServerSupabase()
+  } catch {
+    return { ok: false, data: [], error: "SUPABASE_URL or SUPABASE_ANON_KEY is not configured." }
+  }
   if (!supabase) {
     return { ok: false, data: [], error: "SUPABASE_URL or SUPABASE_ANON_KEY is not configured." }
   }
@@ -115,7 +120,9 @@ export async function updateEvent(id: string, event: Partial<EventData>, passwor
         image: event.image,
         description: event.description,
         ticket_link: event.ticket_link,
-        hover_video: event.hover_video ?? null,
+        // Only include hover_video when explicitly provided — omitting it prevents
+        // a partial update from silently clearing an existing hover video URL.
+        ...("hover_video" in event && { hover_video: event.hover_video ?? null }),
       })
       .eq("id", id)
       .select()
