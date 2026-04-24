@@ -1,30 +1,14 @@
+/** Server-only module — uses fs and Supabase. Do not import in client components. */
 import path from "path"
 import fs from "fs/promises"
 import { getServiceSupabase } from "@/lib/supabase"
 
-export interface AdminConfig {
-  fonts: {
-    heading: string | null
-    body: string | null
-    button: string | null
-    headingBold: boolean
-    bodyBold: boolean
-    buttonBold: boolean
-  }
-  images: {
-    logo: string | null
-    heroPoster: string | null
-    /** Public URL of the hero section background video uploaded via the admin panel. */
-    heroVideo: string | null
-  }
-}
+export type { VenueConfig, InstagramPost, AdminConfig } from "@/lib/admin-config-defaults"
+export { DEFAULT_CONFIG } from "@/lib/admin-config-defaults"
 
-const DEFAULT_CONFIG: AdminConfig = {
-  fonts: { heading: null, body: null, button: null, headingBold: false, bodyBold: false, buttonBold: false },
-  images: { logo: null, heroPoster: null, heroVideo: null },
-}
+import type { AdminConfig } from "@/lib/admin-config-defaults"
+import { DEFAULT_CONFIG } from "@/lib/admin-config-defaults"
 
-// /tmp fallback for local dev without Supabase env vars
 const TMP_CONFIG_PATH = path.join("/tmp", "admin-config.json")
 
 function tryGetServiceSupabase() {
@@ -37,8 +21,15 @@ function tryGetServiceSupabase() {
 
 function mergeWithDefaults(parsed: Partial<AdminConfig>): AdminConfig {
   return {
+    ...DEFAULT_CONFIG,
+    ...parsed,
     fonts: { ...DEFAULT_CONFIG.fonts, ...parsed.fonts },
     images: { ...DEFAULT_CONFIG.images, ...parsed.images },
+    venues: Array.isArray(parsed.venues) && parsed.venues.length > 0
+      ? parsed.venues
+      : DEFAULT_CONFIG.venues,
+    nightlife: { ...DEFAULT_CONFIG.nightlife, ...parsed.nightlife },
+    instagram: { ...DEFAULT_CONFIG.instagram, ...parsed.instagram },
   }
 }
 
@@ -55,7 +46,6 @@ export async function getAdminConfig(): Promise<AdminConfig> {
     } catch { /* fall through to /tmp */ }
   }
 
-  // Fallback: /tmp file (local dev)
   try {
     const raw = await fs.readFile(TMP_CONFIG_PATH, "utf-8")
     return mergeWithDefaults(JSON.parse(raw) as Partial<AdminConfig>)
@@ -74,7 +64,6 @@ export async function setAdminConfig(config: AdminConfig): Promise<void> {
     throw new Error(error.message)
   }
 
-  // Fallback: /tmp file (local dev)
   await fs.mkdir(path.dirname(TMP_CONFIG_PATH), { recursive: true })
   await fs.writeFile(TMP_CONFIG_PATH, JSON.stringify(config, null, 2), "utf-8")
 }

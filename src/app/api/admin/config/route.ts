@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { revalidatePath } from "next/cache"
-import { getAdminConfig, setAdminConfig, AdminConfig } from "@/lib/admin-config"
+import { getAdminConfig, setAdminConfig, DEFAULT_CONFIG, AdminConfig } from "@/lib/admin-config"
 import { verifyAdminPassword } from "@/app/actions/events"
 
 export async function GET() {
@@ -26,18 +26,15 @@ export async function POST(request: NextRequest) {
     }
 
     await setAdminConfig({
+      ...DEFAULT_CONFIG,
+      ...config,
       fonts: {
-        heading: config.fonts?.heading ?? null,
-        body: config.fonts?.body ?? null,
-        button: config.fonts?.button ?? null,
-        headingBold: config.fonts?.headingBold === true,
-        bodyBold: config.fonts?.bodyBold === true,
-        buttonBold: config.fonts?.buttonBold === true,
+        ...DEFAULT_CONFIG.fonts,
+        ...config.fonts,
       },
       images: {
-        logo: config.images?.logo ?? null,
-        heroPoster: config.images?.heroPoster ?? null,
-        heroVideo: config.images?.heroVideo ?? null,
+        ...DEFAULT_CONFIG.images,
+        ...config.images,
       },
     })
 

@@ -27,14 +27,14 @@ export default async function HomePage() {
       <section className="max-w-screen-xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
         <div>
            <p className="text-[#C4C4C4] text-lg leading-relaxed">
-             "We didn't just want to throw parties — we wanted to build a culture."
+             &ldquo;We didn&apos;t just want to throw parties — we wanted to build a culture.&rdquo;
            </p>
            <p className="mt-4 text-white font-display text-2xl">
              Founders: GL, JD, JL, JM
            </p>
         </div>
         <div className="text-[#666] text-sm md:text-base leading-relaxed">
-          What started as a campus movement became Arizona's most recognized nightlife ecosystem.
+          What started as a campus movement became Arizona&apos;s most recognized nightlife ecosystem.
           From VIP tables to national crawls, our mission is simple: memorable nights that run smoothly.
         </div>
       </section>

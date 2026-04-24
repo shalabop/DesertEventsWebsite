@@ -4,12 +4,20 @@ import { useState, useEffect, useRef, useCallback } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { verifyAdminPassword } from "@/app/actions/events"
-import type { AdminConfig } from "@/lib/admin-config"
+import { DEFAULT_CONFIG } from "@/lib/admin-config-defaults"
+import type { AdminConfig, VenueConfig } from "@/lib/admin-config-defaults"
+import { getStoredAdminPassword, storeAdminPassword, clearAdminPassword } from "@/lib/admin-auth"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type FontSlot = "heading" | "body" | "button"
-type ImageSlot = "logo" | "heroPoster" | "heroVideo"
+type ImageSlot =
+  | "logo"
+  | "heroPoster"
+  | "heroVideo"
+  | "nightlifeLogo"
+  | "nightlifeHeroPoster"
+  | "nightlifeHeroVideo"
 
 const LS_KEY = "admin-font-draft"
 
@@ -460,12 +468,21 @@ export default function AdminStylePage() {
   const [authError, setAuthError] = useState("")
 
   const [fonts, setFonts] = useState<string[]>([])
-  const [config, setConfig] = useState<AdminConfig>({
-    fonts: { heading: null, body: null, button: null, headingBold: false, bodyBold: false, buttonBold: false },
-    images: { logo: null, heroPoster: null, heroVideo: null },
-  })
+  const [config, setConfig] = useState<AdminConfig>(DEFAULT_CONFIG)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<Message | null>(null)
+
+  // Auto-login if a session password was stored on /admin/events
+  useEffect(() => {
+    const stored = getStoredAdminPassword()
+    if (stored) {
+      setPassword(stored)
+      verifyAdminPassword(stored).then((valid) => {
+        if (valid) { setIsAuthenticated(true); loadData() }
+      }).catch(() => { /* ignore */ })
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -473,6 +490,7 @@ export default function AdminStylePage() {
     try {
       const valid = await verifyAdminPassword(password)
       if (valid) {
+        storeAdminPassword(password)
         setIsAuthenticated(true)
         loadData()
       } else {
@@ -489,7 +507,7 @@ export default function AdminStylePage() {
     try {
       const res = await fetch("/api/admin/config", { cache: "no-store" })
       const data = await res.json()
-      setConfig((prev) => {
+      setConfig(() => {
         // Merge the persisted server config with any unsaved draft in localStorage
         // so the user's in-progress font selections survive a page refresh.
         let draft: Partial<AdminConfig["fonts"]> = {}
@@ -498,8 +516,10 @@ export default function AdminStylePage() {
           if (raw) draft = JSON.parse(raw)
         } catch { /* ignore */ }
         return {
+          ...DEFAULT_CONFIG,
           ...data,
-          fonts: { ...data.fonts, ...draft },
+          fonts: { ...DEFAULT_CONFIG.fonts, ...data.fonts, ...draft },
+          images: { ...DEFAULT_CONFIG.images, ...data.images },
         }
       })
     } catch {
@@ -538,6 +558,36 @@ export default function AdminStylePage() {
     setConfig((prev) => ({ ...prev, images: { ...prev.images, [slot]: value } }))
   }
 
+  function handleNightlifeChange(field: keyof AdminConfig["nightlife"], value: string) {
+    setConfig((prev) => ({ ...prev, nightlife: { ...prev.nightlife, [field]: value } }))
+  }
+
+  function handleVenueChange(index: number, field: keyof VenueConfig, value: string | null) {
+    setConfig((prev) => {
+      const venues = [...prev.venues]
+      venues[index] = { ...venues[index], [field]: value }
+      return { ...prev, venues }
+    })
+  }
+
+  function handleAddVenue() {
+    setConfig((prev) => ({
+      ...prev,
+      venues: [...prev.venues, { name: "New Venue", vibe: "", img: "/gallery/1.jpg", hoverVideo: null }],
+    }))
+  }
+
+  function handleRemoveVenue(index: number) {
+    setConfig((prev) => ({ ...prev, venues: prev.venues.filter((_, i) => i !== index) }))
+  }
+
+  function handleInstagramChange<K extends keyof AdminConfig["instagram"]>(
+    field: K,
+    value: AdminConfig["instagram"][K]
+  ) {
+    setConfig((prev) => ({ ...prev, instagram: { ...prev.instagram, [field]: value } }))
+  }
+
   async function handleSave() {
     setSaving(true)
     setMessage(null)
@@ -563,10 +613,7 @@ export default function AdminStylePage() {
 
   async function handleReset() {
     if (!confirm("Reset all font and image settings to defaults?")) return
-    const defaultConfig: AdminConfig = {
-      fonts: { heading: null, body: null, button: null, headingBold: false, bodyBold: false, buttonBold: false },
-      images: { logo: null, heroPoster: null, heroVideo: null },
-    }
+    const defaultConfig: AdminConfig = DEFAULT_CONFIG
     setSaving(true)
     setMessage(null)
     try {
@@ -646,7 +693,7 @@ export default function AdminStylePage() {
               Event Manager →
             </Link>
             <button
-              onClick={() => setIsAuthenticated(false)}
+              onClick={() => { clearAdminPassword(); setIsAuthenticated(false) }}
               className="text-sm text-[#666] hover:text-white transition-colors"
             >
               Logout
@@ -751,11 +798,106 @@ export default function AdminStylePage() {
           </div>
         </section>
 
-        {/* ── Section 3: Save / Reset ───────────────────────────────────────────── */}
+        {/* ── Section 3: Nightlife Page ────────────────────────────────────────── */}
+        <section className="bg-[#111] border border-white/10 rounded-2xl p-6 mb-6">
+          <h2 className="font-display text-xl text-white mb-1">Nightlife Page</h2>
+          <p className="text-[#666] text-sm mb-6">Branding and hero media for the /scottsdale-guestlist page.</p>
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-white">Page Heading</label>
+              <input
+                value={config.nightlife.heading}
+                onChange={(e) => handleNightlifeChange("heading", e.target.value)}
+                className="w-full bg-[#1A1A1A] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#32F36A] text-sm"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-white">Subheading</label>
+              <input
+                value={config.nightlife.subheading}
+                onChange={(e) => handleNightlifeChange("subheading", e.target.value)}
+                className="w-full bg-[#1A1A1A] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#32F36A] text-sm"
+              />
+            </div>
+            <div className="border-t border-white/5" />
+            <ImageUploader slot="nightlifeLogo" label="Nightlife Logo" description="Shown above the hero heading. Falls back to the main site logo." currentUrl={config.images.nightlifeLogo} defaultUrl="/de-badge.png" password={password} onChange={handleImageChange} />
+            <div className="border-t border-white/5" />
+            <ImageUploader slot="nightlifeHeroPoster" label="Nightlife Hero Poster" description="Background image for the Nightlife hero section." currentUrl={config.images.nightlifeHeroPoster} defaultUrl="/hero.jpg" password={password} onChange={handleImageChange} />
+            <div className="border-t border-white/5" />
+            <VideoUploader label="Nightlife Hero Video" description="Background video for the Nightlife hero. Uploaded directly to storage." currentUrl={config.images.nightlifeHeroVideo} password={password} onChange={(url) => handleImageChange("nightlifeHeroVideo", url)} />
+          </div>
+        </section>
+
+        {/* ── Section 4: Venues ────────────────────────────────────────────────── */}
+        <section className="bg-[#111] border border-white/10 rounded-2xl p-6 mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="font-display text-xl text-white">Venues</h2>
+              <p className="text-[#666] text-sm mt-0.5">Edit the participating venues shown on the Nightlife page.</p>
+            </div>
+            <button type="button" onClick={handleAddVenue} className="text-sm bg-[#32F36A] text-black px-3 py-1.5 rounded-lg font-medium hover:opacity-90">
+              + Add
+            </button>
+          </div>
+          <div className="space-y-6">
+            {config.venues.map((venue, i) => (
+              <div key={i} className="p-4 bg-[#1A1A1A] rounded-xl border border-white/5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-white text-sm font-medium">{venue.name || `Venue ${i + 1}`}</span>
+                  <button type="button" onClick={() => handleRemoveVenue(i)} className="text-xs text-red-400 hover:text-red-300 px-2 py-1">✕ Remove</button>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs text-[#666] mb-1">Name</label>
+                    <input value={venue.name} onChange={(e) => handleVenueChange(i, "name", e.target.value)} className="w-full bg-[#111] border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#32F36A]" />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-[#666] mb-1">Vibe / tagline</label>
+                    <input value={venue.vibe} onChange={(e) => handleVenueChange(i, "vibe", e.target.value)} className="w-full bg-[#111] border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#32F36A]" />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs text-[#666] mb-1">Image path or URL</label>
+                    <input value={venue.img} onChange={(e) => handleVenueChange(i, "img", e.target.value)} className="w-full bg-[#111] border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#32F36A]" placeholder="/venues/riot-house.jpg" />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs text-[#666] mb-1">Hover video URL (optional)</label>
+                    <input value={venue.hoverVideo ?? ""} onChange={(e) => handleVenueChange(i, "hoverVideo", e.target.value || null)} className="w-full bg-[#111] border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#32F36A]" placeholder="https://…/venue-clip.mp4" />
+                    <p className="text-[#555] text-xs mt-1">Upload via Supabase or paste a public video URL.</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── Section 5: Instagram ─────────────────────────────────────────────── */}
+        <section className="bg-[#111] border border-white/10 rounded-2xl p-6 mb-6">
+          <h2 className="font-display text-xl text-white mb-1">Instagram Feed</h2>
+          <p className="text-[#666] text-sm mb-6">
+            Requires <code className="bg-[#1A1A1A] px-1 rounded">INSTAGRAM_ACCESS_TOKEN</code> env var.
+            When disabled the section is hidden on the site.
+          </p>
+          <div className="space-y-5">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input type="checkbox" checked={config.instagram.enabled} onChange={(e) => handleInstagramChange("enabled", e.target.checked)} className="w-4 h-4 accent-[#32F36A]" />
+              <span className="text-sm text-white">Enable Instagram feed on the site</span>
+            </label>
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-white">Section heading</label>
+              <input value={config.instagram.heading} onChange={(e) => handleInstagramChange("heading", e.target.value)} className="w-full bg-[#1A1A1A] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#32F36A]" />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-white">Number of posts to show</label>
+              <input type="number" min={1} max={24} value={config.instagram.postsCount} onChange={(e) => handleInstagramChange("postsCount", Math.max(1, Math.min(24, Number(e.target.value))))} className="w-32 bg-[#1A1A1A] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#32F36A]" />
+            </div>
+          </div>
+        </section>
+
+        {/* ── Section 6: Save / Reset ───────────────────────────────────────────── */}
         <section className="bg-[#111] border border-white/10 rounded-2xl p-6">
           <h2 className="font-display text-xl text-white mb-4">Save Changes</h2>
           <p className="text-[#666] text-sm mb-5">
-            Clicking "Save Changes" will apply your font and image selections to every page on the site.
+            Clicking &ldquo;Save Changes&rdquo; will apply your font and image selections to every page on the site.
             You can always reset back to the original defaults.
           </p>
           <div className="flex flex-col sm:flex-row gap-3">

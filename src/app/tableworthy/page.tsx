@@ -14,7 +14,7 @@ export default function TableworthyPage() {
       </section>
 
       <section className="max-w-screen-xl mx-auto px-6 grid md:grid-cols-3 gap-6">
-        {["Influencer Dinners", "UGC & Brand Activations", "Experiential Partnerships"].map((s, i) => (
+        {["Influencer Dinners", "UGC & Brand Activations", "Experiential Partnerships"].map((s) => (
           <div key={s} className="p-8 rounded-2xl bg-[#111] border border-white/10">
              <h3 className="font-display text-2xl mb-2">{s}</h3>
              <p className="text-[#888]">Curated campaigns that drive visibility and authentic content creation.</p>
@@ -25,7 +25,7 @@ export default function TableworthyPage() {
       <section className="max-w-screen-xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
          <div>
             <h2 className="font-display text-4xl mb-4">Book a Campaign</h2>
-            <p className="text-[#C4C4C4]">Tell us your goals. We'll curate the crowd.</p>
+            <p className="text-[#C4C4C4]">Tell us your goals. We&apos;ll curate the crowd.</p>
          </div>
          <form action={async (fd) => {
             const data = Object.fromEntries(fd)

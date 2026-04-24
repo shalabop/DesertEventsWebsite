@@ -127,8 +127,8 @@ export default function SocietySessionsPage() {
           <div className="bg-[#111] p-6 md:p-8 rounded-2xl border border-white/10">
             {status === "success" ? (
               <div className="text-center py-4">
-                <div className="text-[#32F36A] font-display text-xl mb-2">You're on the list!</div>
-                <p className="text-[#C4C4C4] text-sm">We'll reach out with exclusive session invites.</p>
+                <div className="text-[#32F36A] font-display text-xl mb-2">You&apos;re on the list!</div>
+                <p className="text-[#C4C4C4] text-sm">We&apos;ll reach out with exclusive session invites.</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">

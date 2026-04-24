@@ -72,8 +72,9 @@ export async function submitLead(payload: LeadInput) {
     }
 
     return { ok: true }
-  } catch (e:any) {
-    console.error("submitLead error:", e?.message || e)
-    return { ok: false, error: e?.message || "Failed to submit" }
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : "Failed to submit"
+    console.error("submitLead error:", msg)
+    return { ok: false, error: msg }
   }
 }

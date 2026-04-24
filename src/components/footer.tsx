@@ -22,7 +22,7 @@ export function Footer() {
           <div className="sm:col-span-2 md:col-span-1">
             <div className="font-display text-lg">Desert Events Arizona</div>
             <p className="text-[#C4C4C4] mt-3 leading-relaxed">
-              Arizona's leading nightlife & event collective. <br className="hidden sm:block"/>
+              Arizona&apos;s leading nightlife &amp; event collective. <br className="hidden sm:block"/>
               Creating culture in the desert.
             </p>
           </div>
@@ -53,7 +53,7 @@ export function Footer() {
           <div className="sm:col-span-2 md:col-span-1">
              <div className="font-semibold mb-3 text-white">Newsletter</div>
              {status === "success" ? (
-               <div className="text-[#32F36A]">You're on the list.</div>
+               <div className="text-[#32F36A]">You&apos;re on the list.</div>
              ) : (
                <form action={handleSubmit} className="flex flex-col sm:flex-row md:flex-col gap-2">
                  <input name="email" required type="email" placeholder="your@email.com"

@@ -26,7 +26,7 @@ const contactSchema = z.object({
   message: z.string().min(1),
 })
 
-export async function submitContact(payload: any) {
+export async function submitContact(payload: Record<string, unknown>) {
   try {
     const data = contactSchema.parse(payload)
     const sb = getServerSupabase()
@@ -39,31 +39,31 @@ export async function submitContact(payload: any) {
     })
     if (error) throw error
     return { ok: true }
-  } catch (e: any) {
-    return { ok: false, error: e.message || "Failed" }
+  } catch (e: unknown) {
+    return { ok: false, error: e instanceof Error ? e.message : "Failed" }
   }
 }
 
 // --- Tableworthy ---
-export async function submitTableworthy(payload: any) {
+export async function submitTableworthy(payload: Record<string, unknown>) {
   try {
     const sb = getServerSupabase()
     const { error } = await sb.from("tableworthy_leads").insert(payload)
     if (error) throw error
     return { ok: true }
-  } catch (e: any) {
-    return { ok: false, error: e.message }
+  } catch (e: unknown) {
+    return { ok: false, error: e instanceof Error ? e.message : "Failed" }
   }
 }
 
 // --- Le Tour Host ---
-export async function submitCrawlHost(payload: any) {
+export async function submitCrawlHost(payload: Record<string, unknown>) {
   try {
     const sb = getServerSupabase()
     const { error } = await sb.from("crawl_hosts").insert(payload)
     if (error) throw error
     return { ok: true }
-  } catch (e: any) {
-    return { ok: false, error: e.message }
+  } catch (e: unknown) {
+    return { ok: false, error: e instanceof Error ? e.message : "Failed" }
   }
 }

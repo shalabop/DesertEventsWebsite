@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 
 const links = [
   { href: "/", label: "Home" },
-  { href: "/scottsdale-guestlist", label: "Scottsdale GuestList" },
+  { href: "/scottsdale-guestlist", label: "Nightlife" },
   { href: "/upcoming-events", label: "Upcoming Events" },
   { href: "/tableworthy", label: "Tableworthy" },
   { href: "/about", label: "About" },
@@ -18,8 +18,9 @@ export function Navbar({ logoSrc = "/de-badge.png" }: { logoSrc?: string }) {
   const pathname = usePathname()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
-  // Close mobile menu on route change
+  // Close mobile menu on route change — setState in effect is intentional here.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMobileMenuOpen(false)
   }, [pathname])
 

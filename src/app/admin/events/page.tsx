@@ -2,7 +2,9 @@
 
 import { useState, useEffect, useRef } from "react"
 import Image from "next/image"
+import Link from "next/link"
 import { createEvent, updateEvent, deleteEvent, getEvents, verifyAdminPassword, uploadEventImage, EventData, EventType } from "@/app/actions/events"
+import { getStoredAdminPassword, storeAdminPassword, clearAdminPassword } from "@/lib/admin-auth"
 
 const eventTypes: { value: EventType; label: string }[] = [
   { value: "le-tour-de-crawl", label: "Bar Crawling" },
@@ -41,24 +43,9 @@ export default function AdminEventsPage() {
     type: "le-tour-de-crawl",
     image: "/gallery/1.jpg",
     description: "",
-    ticket_link: "#"
+    ticket_link: "#",
+    hover_video: null,
   })
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setAuthError("")
-    try {
-      const isValid = await verifyAdminPassword(password)
-      if (isValid) {
-        setIsAuthenticated(true)
-        loadEvents()
-      } else {
-        setAuthError("Invalid password")
-      }
-    } catch (err) {
-      setAuthError("Connection error. Please try again.")
-    }
-  }
 
   const loadEvents = async () => {
     setLoading(true)
@@ -66,11 +53,42 @@ export default function AdminEventsPage() {
       const result = await getEvents()
       if (result.ok) {
         setEvents(result.data)
+      } else {
+        setMessage({ type: "error", text: result.error ?? "Failed to load events." })
       }
-    } catch (err) {
-      console.error("Failed to load events:", err)
+    } catch (err: unknown) {
+      setMessage({ type: "error", text: err instanceof Error ? err.message : "Failed to load events." })
     }
     setLoading(false)
+  }
+
+  // Auto-login if session password exists (shared with /admin)
+  useEffect(() => {
+    const stored = getStoredAdminPassword()
+    if (stored) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setPassword(stored)
+      verifyAdminPassword(stored).then((valid) => {
+        if (valid) { setIsAuthenticated(true); loadEvents() }
+      }).catch(() => { /* ignore */ })
+    }
+  }, [])
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setAuthError("")
+    try {
+      const isValid = await verifyAdminPassword(password)
+      if (isValid) {
+        storeAdminPassword(password)
+        setIsAuthenticated(true)
+        loadEvents()
+      } else {
+        setAuthError("Invalid password")
+      }
+    } catch {
+      setAuthError("Connection error. Please try again.")
+    }
   }
 
   const resetForm = () => {
@@ -83,7 +101,8 @@ export default function AdminEventsPage() {
       type: "le-tour-de-crawl",
       image: "/gallery/1.jpg",
       description: "",
-      ticket_link: "#"
+      ticket_link: "#",
+      hover_video: null,
     })
     setEditingEvent(null)
     setImageSource("gallery")
@@ -115,8 +134,8 @@ export default function AdminEventsPage() {
           fileInputRef.current.value = ""
         }
       }
-    } catch (err: any) {
-      setMessage({ type: "error", text: err?.message || "Failed to upload image" })
+    } catch (err: unknown) {
+      setMessage({ type: "error", text: err instanceof Error ? err.message : "Failed to upload image" })
     }
     setUploadingImage(false)
   }
@@ -141,8 +160,8 @@ export default function AdminEventsPage() {
       } else {
         setMessage({ type: "error", text: result.error || "Failed to save event" })
       }
-    } catch (err: any) {
-      setMessage({ type: "error", text: err?.message || "An error occurred. Please try again." })
+    } catch (err: unknown) {
+      setMessage({ type: "error", text: err instanceof Error ? err.message : "An error occurred. Please try again." })
     }
     setLoading(false)
   }
@@ -158,7 +177,8 @@ export default function AdminEventsPage() {
       type: event.type,
       image: event.image,
       description: event.description,
-      ticket_link: event.ticket_link
+      ticket_link: event.ticket_link,
+      hover_video: event.hover_video ?? null,
     })
     // Check if image is from gallery or uploaded
     const isGalleryImage = defaultImages.some(img => img.value === event.image)
@@ -178,8 +198,8 @@ export default function AdminEventsPage() {
       } else {
         setMessage({ type: "error", text: result.error || "Failed to delete event" })
       }
-    } catch (err: any) {
-      setMessage({ type: "error", text: err?.message || "Failed to delete event" })
+    } catch (err: unknown) {
+      setMessage({ type: "error", text: err instanceof Error ? err.message : "Failed to delete event" })
     }
     setLoading(false)
   }
@@ -225,12 +245,17 @@ export default function AdminEventsPage() {
             <h1 className="font-display text-3xl text-white">Event Manager</h1>
             <p className="text-[#888] text-sm mt-1">Add, edit, and delete upcoming events</p>
           </div>
-          <button
-            onClick={() => setIsAuthenticated(false)}
-            className="text-[#888] hover:text-white text-sm"
-          >
-            Logout
-          </button>
+          <div className="flex items-center gap-3">
+            <Link href="/admin" className="text-sm text-[#888] hover:text-white transition-colors px-3 py-2 rounded-lg hover:bg-white/5">
+              ← Site Settings
+            </Link>
+            <button
+              onClick={() => { clearAdminPassword(); setIsAuthenticated(false) }}
+              className="text-[#888] hover:text-white text-sm"
+            >
+              Logout
+            </button>
+          </div>
         </div>
 
         {/* Message */}
@@ -421,6 +446,18 @@ export default function AdminEventsPage() {
                   rows={3}
                   className="w-full bg-[#1A1A1A] border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-[#666] focus:outline-none focus:border-[#32F36A] resize-none"
                   required
+                />
+              </div>
+
+              {/* Hover Video */}
+              <div className="md:col-span-2">
+                <label className="block text-sm text-[#888] mb-1">Hover Video URL (optional)</label>
+                <input
+                  type="text"
+                  value={formData.hover_video ?? ""}
+                  onChange={(e) => setFormData({ ...formData, hover_video: e.target.value || null })}
+                  placeholder="https://… (public MP4/WebM URL played on card hover)"
+                  className="w-full bg-[#1A1A1A] border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-[#666] focus:outline-none focus:border-[#32F36A]"
                 />
               </div>
             </div>
